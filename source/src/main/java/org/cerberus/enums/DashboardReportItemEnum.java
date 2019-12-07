@@ -24,5 +24,53 @@ package org.cerberus.enums;
  */
 
 
-public class DashboardReportItemEnum {
+public enum DashboardReportItemEnum {
+    NOT_VALID("NOT_VALID","Not valid report item","N",0),
+    CAMPAIGN_EVOLUTION("CAMPAIGN_EVOLUTION","Campaign evolution","Y",1);
+    
+    private String reportItemCode;
+    private String reportItemTitle;
+    private String isConfigurable;
+    private int reportItemType;
+
+    private DashboardReportItemEnum(String reportItemCode, String reportItemTitle, String isConfigurable, int reportItemType) {
+        this.reportItemCode = reportItemCode;
+        this.reportItemTitle = reportItemTitle;
+        this.isConfigurable = isConfigurable;
+        this.reportItemType = reportItemType;
+    }
+
+    public String getReportItemCode() {
+        return reportItemCode;
+    }
+
+    public void setReportItemCode(String reportItemCode) {
+        this.reportItemCode = reportItemCode;
+    }
+
+    public String getReportItemTitle() {
+        return reportItemTitle;
+    }
+
+    public void setReportItemTitle(String reportItemTitle) {
+        this.reportItemTitle = reportItemTitle;
+    }
+
+    public String getIsConfigurable() {
+        return isConfigurable;
+    }
+
+    public void setIsConfigurable(String isConfigurable) {
+        this.isConfigurable = isConfigurable;
+    }
+
+    public int getReportItemType() {
+        return reportItemType;
+    }
+
+    public void setReportItemType(int reportItemType) {
+        this.reportItemType = reportItemType;
+    }
+    
+    
 }
