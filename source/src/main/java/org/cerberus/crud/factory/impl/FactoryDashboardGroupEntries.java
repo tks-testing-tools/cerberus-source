@@ -21,6 +21,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroupEntries;
+import org.cerberus.crud.entity.User;
 import org.cerberus.crud.factory.IFactoryDashboardGroupEntries;
 import org.springframework.stereotype.Service;
 
@@ -32,10 +33,10 @@ import org.springframework.stereotype.Service;
 public class FactoryDashboardGroupEntries implements IFactoryDashboardGroupEntries {
     
     @Override
-    public DashboardGroupEntries create(String codeGroupEntries, int idUser, @Nullable List<DashboardEntry> dashboardEntries, int sort) {
+    public DashboardGroupEntries create(String codeGroupEntries, User user, @Nullable List<DashboardEntry> dashboardEntries, int sort) {
         DashboardGroupEntries dashboardGroupEntries = new DashboardGroupEntries();
         dashboardGroupEntries.setCodeGroupEntries(codeGroupEntries);
-        dashboardGroupEntries.setIdUser(idUser);
+        dashboardGroupEntries.setUser(user);
         if (dashboardEntries != null) {
             dashboardGroupEntries.setDashboardEntries(dashboardEntries);
         }

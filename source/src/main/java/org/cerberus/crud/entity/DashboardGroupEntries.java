@@ -26,7 +26,7 @@ import java.util.List;
 public class DashboardGroupEntries {
 
     private String codeGroupEntries;
-    private int idUser;
+    private User user;
     private List<DashboardEntry> dashboardEntries;
     private int sort;
 
@@ -38,14 +38,14 @@ public class DashboardGroupEntries {
         this.codeGroupEntries = codeGroupEntries;
     }
 
-    public int getIdUser() {
-        return idUser;
+    public User getUser() {
+        return user;
     }
 
-    public void setIdUser(int idUser) {
-        this.idUser = idUser;
+    public void setUser(User user) {
+        this.user = user;
     }
-
+    
     public List<DashboardEntry> getDashboardEntries() {
         return dashboardEntries;
     }

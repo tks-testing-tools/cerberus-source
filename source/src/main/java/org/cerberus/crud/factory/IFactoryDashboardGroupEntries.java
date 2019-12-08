@@ -19,8 +19,10 @@ along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
 package org.cerberus.crud.factory;
 
 import java.util.List;
+import javax.annotation.Nullable;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroupEntries;
+import org.cerberus.crud.entity.User;
 
 /**
  *
@@ -29,5 +31,5 @@ import org.cerberus.crud.entity.DashboardGroupEntries;
 
 
 public interface IFactoryDashboardGroupEntries {
-    public DashboardGroupEntries create(String codeGroupEntries,int idUser,List<DashboardEntry> dashboardEntries,int sort);
+    public DashboardGroupEntries create(String codeGroupEntries, User user, @Nullable List<DashboardEntry> dashboardEntries, int sort);
 }

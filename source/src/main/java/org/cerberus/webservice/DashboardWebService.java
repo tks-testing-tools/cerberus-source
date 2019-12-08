@@ -17,7 +17,10 @@
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
 package org.cerberus.webservice;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -27,6 +30,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cerberus.crud.entity.DashboardEntry;
+import org.cerberus.crud.entity.DashboardGroupEntries;
+import org.cerberus.crud.entity.User;
+import org.cerberus.crud.factory.IFactoryDashboardEntry;
+import org.cerberus.crud.factory.IFactoryDashboardGroupEntries;
+import org.cerberus.crud.service.IUserService;
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * Dashboard webservice, target is read and update value of user dashboard
@@ -38,13 +49,44 @@ public class DashboardWebService {
 
     private static final Logger LOG = LogManager.getLogger(DashboardWebService.class);
 
+    private IFactoryDashboardEntry factoryDashboardEntry;
+    private IFactoryDashboardGroupEntries factoryDashboardGroupEntries;
+    private IUserService userService;
     /*
-    * return all dashboard entries classed sorted by dashboard group entries in map
-    */
+     * return all dashboard entries classed sorted by dashboard group entries in map
+     */
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/poc")
+    public Response poc(@Context ServletContext servletContext, @Context HttpServletRequest request) {
+        LOG.info("READ DASHBOARD");
+        ApplicationContext appContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+        this.factoryDashboardEntry = appContext.getBean(IFactoryDashboardEntry.class);
+        this.factoryDashboardGroupEntries = appContext.getBean(IFactoryDashboardGroupEntries.class);
+        this.userService = appContext.getBean(IUserService.class);
+        Map<String, Object> maResponse = new HashMap();
+        try {
+            User user = userService.findUserByKey(request.getRemoteUser());
+            DashboardEntry dashboardEntry = this.factoryDashboardEntry.create("TOTO", null, "TOTOPARAM", "TOTOPARAM2");
+            DashboardGroupEntries dashboardGroupEntries = this.factoryDashboardGroupEntries.create("TITI", user, null, 1);
+            maResponse.put("dashboard entry", dashboardEntry);
+            maResponse.put("dashboard group entries", dashboardGroupEntries);
+        } catch (Exception e) {
+            LOG.error("Exception catch during recup user process : {}", e);
+        }
+
+        return Response.ok(maResponse).status(200)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Credentials", "true")
+                .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
+                .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD").build();
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/read")
-    public Response readDashboard(@Context ServletContext servletContext) {
+    public Response readDashboard(@Context ServletContext servletContext, @Context HttpServletRequest request) {
         LOG.info("READ DASHBOARD");
         return Response.ok("read dashboard actually not implemented").status(200)
                 .header("Access-Control-Allow-Origin", "*")
@@ -54,8 +96,8 @@ public class DashboardWebService {
     }
 
     /*
-    * update dashboard entries for user. take dashboard group entries parameter and return update status.
-    */
+     * update dashboard entries for user. take dashboard group entries parameter and return update status.
+     */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/update")
@@ -69,8 +111,8 @@ public class DashboardWebService {
     }
 
     /*
-    * read existing report item sorted by type
-    */
+     * read existing report item sorted by type
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/readrepitem")
