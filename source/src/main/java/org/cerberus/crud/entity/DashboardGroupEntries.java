@@ -18,6 +18,7 @@
 package org.cerberus.crud.entity;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  *
@@ -25,11 +26,20 @@ import java.util.List;
  */
 public class DashboardGroupEntries {
 
+    private Integer id;
     private String codeGroupEntries;
     private User user;
     private List<DashboardEntry> dashboardEntries;
-    private int sort;
+    private String sort;
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+    
     public String getCodeGroupEntries() {
         return codeGroupEntries;
     }
@@ -45,7 +55,7 @@ public class DashboardGroupEntries {
     public void setUser(User user) {
         this.user = user;
     }
-    
+
     public List<DashboardEntry> getDashboardEntries() {
         return dashboardEntries;
     }
@@ -54,12 +64,31 @@ public class DashboardGroupEntries {
         this.dashboardEntries = dashboardEntries;
     }
 
-    public int getSort() {
+    public String getSort() {
         return sort;
     }
 
-    public void setSort(int sort) {
+    public void setSort(String sort) {
         this.sort = sort;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+        if (!(other instanceof DashboardGroupEntries)) {
+            return false;
+        }
+        DashboardGroupEntries otherObject = (DashboardGroupEntries) other;
+        boolean sameCode = otherObject.getCodeGroupEntries().equalsIgnoreCase(this.getCodeGroupEntries());
+        boolean sameUser = otherObject.getUser().equals(this.user);
+        return sameCode && sameUser;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(codeGroupEntries, user);
     }
 
 }

@@ -17,7 +17,9 @@
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
 package org.cerberus.webservice;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +37,7 @@ import org.cerberus.crud.entity.DashboardGroupEntries;
 import org.cerberus.crud.entity.User;
 import org.cerberus.crud.factory.IFactoryDashboardEntry;
 import org.cerberus.crud.factory.IFactoryDashboardGroupEntries;
+import org.cerberus.crud.service.IDashboardGroupEntriesService;
 import org.cerberus.crud.service.IUserService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -52,6 +55,7 @@ public class DashboardWebService {
     private IFactoryDashboardEntry factoryDashboardEntry;
     private IFactoryDashboardGroupEntries factoryDashboardGroupEntries;
     private IUserService userService;
+    private IDashboardGroupEntriesService dashboardGroupEntriesService;
     /*
      * return all dashboard entries classed sorted by dashboard group entries in map
      */
@@ -62,25 +66,24 @@ public class DashboardWebService {
     public Response poc(@Context ServletContext servletContext, @Context HttpServletRequest request) {
         LOG.info("READ DASHBOARD");
         ApplicationContext appContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-        this.factoryDashboardEntry = appContext.getBean(IFactoryDashboardEntry.class);
-        this.factoryDashboardGroupEntries = appContext.getBean(IFactoryDashboardGroupEntries.class);
+        this.dashboardGroupEntriesService = appContext.getBean(IDashboardGroupEntriesService.class);
         this.userService = appContext.getBean(IUserService.class);
-        Map<String, Object> maResponse = new HashMap();
-        try {
-            User user = userService.findUserByKey(request.getRemoteUser());
-            DashboardEntry dashboardEntry = this.factoryDashboardEntry.create("TOTO", null, "TOTOPARAM", "TOTOPARAM2");
-            DashboardGroupEntries dashboardGroupEntries = this.factoryDashboardGroupEntries.create("TITI", user, null, 1);
-            maResponse.put("dashboard entry", dashboardEntry);
-            maResponse.put("dashboard group entries", dashboardGroupEntries);
-        } catch (Exception e) {
-            LOG.error("Exception catch during recup user process : {}", e);
+        User currentUser = new User();
+        if (request.getRemoteUser() != null) {
+            try {
+                currentUser = userService.findUserByKey(request.getRemoteUser());
+            } catch (Exception exception) {
+                LOG.error("Exception during read user process : ", exception);
+            }
+            return Response.ok(dashboardGroupEntriesService.readDashboard(currentUser)).status(200)
+                    .header("Access-Control-Allow-Origin", "*")
+                    .header("Access-Control-Allow-Credentials", "true")
+                    .build();
         }
-
-        return Response.ok(maResponse).status(200)
+        return Response.ok("Unspecified user, please contact administrator").status(200)
                 .header("Access-Control-Allow-Origin", "*")
                 .header("Access-Control-Allow-Credentials", "true")
-                .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
-                .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD").build();
+                .build();
     }
 
     @GET

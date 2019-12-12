@@ -1,21 +1,20 @@
 /**
- * Cerberus Copyright (C) 2013 - 2017 cerberustesting
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ * Cerberus Copyright (C) 2013 - 2017 cerberustesting DO NOT ALTER OR REMOVE
+ * COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This file is part of Cerberus.
  *
- * Cerberus is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Cerberus is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * Cerberus is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Cerberus is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * Cerberus. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.cerberus.database;
 
@@ -8354,6 +8353,18 @@ public class DatabaseVersioningService implements IDatabaseVersioningService {
         // 1456
         a.add("UPDATE dashboardReportItem SET `isConfigurable`='Y' WHERE 1=1;");
 
+        a.add("DROP TABLE `dashboardEntry`;");
+
+        a.add("CREATE TABLE `dashboardEntry` ("
+                + "	`idGroupEntries` int(11) NOT NULL,"
+                + "	`reportItemCode` varchar(50) NOT NULL,"
+                + "	`param1` varchar(255) DEFAULT NULL,"
+                + "	`param2` varchar(255) DEFAULT NULL,"
+                + "	PRIMARY KEY (`idGroupEntries`,`reportItemCode`),"
+                + "	CONSTRAINT `FK_dashboardEntry_01` FOREIGN KEY (`idGroupEntries`) REFERENCES `dashboardGroupEntries` (`idGroupEntries`) ON DELETE CASCADE ON UPDATE CASCADE,"
+                + "	CONSTRAINT `FK_dashboardEntry_02` FOREIGN KEY (`reportItemCode`) REFERENCES `dashboardReportItem` (`reportItemCode`)"
+                + ")ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;");
+        
         return a;
     }
 

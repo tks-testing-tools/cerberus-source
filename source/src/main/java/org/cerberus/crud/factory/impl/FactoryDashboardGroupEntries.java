@@ -31,12 +31,17 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class FactoryDashboardGroupEntries implements IFactoryDashboardGroupEntries {
-    
+
     @Override
-    public DashboardGroupEntries create(String codeGroupEntries, User user, @Nullable List<DashboardEntry> dashboardEntries, int sort) {
+    public DashboardGroupEntries create(@Nullable Integer id, String codeGroupEntries, @Nullable User user, @Nullable List<DashboardEntry> dashboardEntries, String sort) {
         DashboardGroupEntries dashboardGroupEntries = new DashboardGroupEntries();
+        if(id != null){
+            dashboardGroupEntries.setId(id);
+        }
         dashboardGroupEntries.setCodeGroupEntries(codeGroupEntries);
-        dashboardGroupEntries.setUser(user);
+        if (user != null) {
+            dashboardGroupEntries.setUser(user);
+        }
         if (dashboardEntries != null) {
             dashboardGroupEntries.setDashboardEntries(dashboardEntries);
         }

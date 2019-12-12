@@ -17,17 +17,61 @@
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
 package org.cerberus.crud.dao.impl;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cerberus.crud.dao.IDashboardEntryDAO;
+import org.cerberus.crud.entity.DashboardEntry;
+import org.cerberus.crud.entity.DashboardGroupEntries;
+import org.cerberus.crud.factory.IFactoryDashboardEntry;
+import org.cerberus.database.DatabaseSpring;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /**
  *
- * @author utilisateur
+ * @author cDelage
  */
 @Repository
 public class DashboardEntryDAO implements IDashboardEntryDAO {
 
     private static final Logger LOG = LogManager.getLogger(DashboardEntryDAO.class);
+
+    @Autowired
+    private DatabaseSpring databaseSpring;
+
+    @Autowired
+    private IFactoryDashboardEntry factoryDashboardEntry;
+
+    @Override
+    public List<DashboardEntry> readByGroupEntries(DashboardGroupEntries dashboardGroupEntries) {
+        List<DashboardEntry> response = new ArrayList();
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT`reportItemCode`,`param1`,`param2` FROM `dashboardEntry`WHERE `idGroupEntries` = ?;");
+        try {
+            Connection connection = databaseSpring.connect();
+            PreparedStatement preStat = connection.prepareStatement(query.toString());
+            preStat.setInt(1, dashboardGroupEntries.getId());
+            ResultSet rs = preStat.executeQuery();
+            while (rs.next()) {
+                response.add(this.loadFromResultSet(rs));
+            }
+        } catch (SQLException exception) {
+            LOG.error("Catch exception during read dashboard entry by group", exception);
+        }
+        return response;
+    }
+
+    @Override
+    public DashboardEntry loadFromResultSet(ResultSet rs) throws SQLException {
+        String reportItemCode = rs.getString("reportItemCode");
+        String param1 = rs.getString("param1");
+        String param2 = rs.getString("param2");
+        return factoryDashboardEntry.create(reportItemCode, null, param1, param2);
+    }
 }

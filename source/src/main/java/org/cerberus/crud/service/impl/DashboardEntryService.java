@@ -17,9 +17,16 @@
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
 package org.cerberus.crud.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cerberus.crud.dao.IDashboardEntryDAO;
+import org.cerberus.crud.dao.IDashboardEntryDataDAO;
+import org.cerberus.crud.entity.DashboardEntry;
+import org.cerberus.crud.entity.DashboardGroupEntries;
 import org.cerberus.crud.service.IDashboardEntryService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -30,4 +37,25 @@ import org.springframework.stereotype.Service;
 public class DashboardEntryService implements IDashboardEntryService {
 
     private static final Logger LOG = LogManager.getLogger(DashboardEntryService.class);
+
+    @Autowired
+    private IDashboardEntryDAO dashboardEntryDAO;
+
+    @Autowired
+    private IDashboardEntryDataDAO dashboardEntryDataDAO;
+
+    @Override
+    public List<DashboardEntry> readByGroupEntriesWithData(DashboardGroupEntries dashboardGroupEntries) {
+        List<DashboardEntry> response = new ArrayList();
+        response = this.readByGroupEntries(dashboardGroupEntries);
+        for (DashboardEntry ent : response) {
+            ent.setEntryData(this.dashboardEntryDataDAO.readDataForDashboardEntry(ent));
+        }
+        return response;
+    }
+
+    @Override
+    public List<DashboardEntry> readByGroupEntries(DashboardGroupEntries dashboardGroupEntries) {
+        return dashboardEntryDAO.readByGroupEntries(dashboardGroupEntries);
+    }
 }

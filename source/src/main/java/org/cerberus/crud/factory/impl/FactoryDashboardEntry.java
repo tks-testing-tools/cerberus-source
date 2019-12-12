@@ -20,6 +20,8 @@ package org.cerberus.crud.factory.impl;
 
 import java.util.Map;
 import javax.annotation.Nullable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.factory.IFactoryDashboardEntry;
 import org.springframework.stereotype.Service;
@@ -31,9 +33,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class FactoryDashboardEntry implements IFactoryDashboardEntry {
 
+    private static final Logger LOG = LogManager.getLogger(FactoryDashboardEntry.class);
+    
     @Override
     public DashboardEntry create(String codeReportItem, @Nullable Map<String, Object> entryData, String paramFirst, String paramSecond) {
         DashboardEntry dashboardEntry = new DashboardEntry();
+        LOG.debug("Create dashboard entry : ", codeReportItem);
         dashboardEntry.setCodeReportItem(codeReportItem);
         if (entryData != null) {
             dashboardEntry.setEntryData(entryData);
