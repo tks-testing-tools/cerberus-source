@@ -67,6 +67,51 @@ public class DashboardEntryDAO implements IDashboardEntryDAO {
         return response;
     }
 
+    /**
+     * Create a dashboard entry
+     *
+     * @param reportItemCode report item code string
+     * @param param1 first param of the dashboard
+     * @param param2 second param of the dashboard
+     * @return the new id group entries
+     */
+    @Override
+    public String create(int idGroupEntries, String reportItemCode, String param1, String param2) {
+        String result = new String();
+        final String query = "INSERT INTO dashboardEntry(idGroupEntries, reportItemCode, param1, param2) VALUES (?,?,?,?)";
+
+        try {
+            Connection connection = databaseSpring.connect();
+            try {
+                PreparedStatement preStat = connection.prepareStatement(query);
+
+                preStat.setInt(1, idGroupEntries);
+                preStat.setString(2, reportItemCode);
+                preStat.setString(3, param1);
+                preStat.setString(4, param2);
+                preStat.execute();
+                preStat.close();
+                result = "Insert entry successfully";
+            } catch (SQLException exception) {
+                LOG.error("Unable to execute query : " + exception.toString());
+                result = "Insert entry failed";
+            } finally {
+                try {
+
+                    if (connection != null) {
+                        connection.close();
+                    }
+                } catch (SQLException e) {
+                    LOG.warn(e.toString());
+                }
+            }
+        } catch (Exception exception) {
+            LOG.error("Failed to connect to database, catched Exception : ", exception);
+        }
+
+        return result;
+    }
+
     @Override
     public DashboardEntry loadFromResultSet(ResultSet rs) throws SQLException {
         String reportItemCode = rs.getString("reportItemCode");

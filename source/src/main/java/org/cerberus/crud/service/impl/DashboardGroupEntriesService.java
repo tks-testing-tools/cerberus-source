@@ -19,18 +19,14 @@ package org.cerberus.crud.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cerberus.crud.dao.IDashboardGroupEntriesDAO;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroupEntries;
 import org.cerberus.crud.entity.User;
-import org.cerberus.crud.factory.IFactoryDashboardGroupEntries;
 import org.cerberus.crud.service.IDashboardEntryService;
 import org.cerberus.crud.service.IDashboardGroupEntriesService;
-import org.cerberus.crud.service.IUserService;
 import org.cerberus.dto.DashboardGroupEntriesDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,6 +57,7 @@ public class DashboardGroupEntriesService implements IDashboardGroupEntriesServi
         List<DashboardGroupEntries> dashboardGroupEntriesList = new ArrayList();
         dashboardGroupEntriesList = this.readByUser(user);
         for (DashboardGroupEntries grp : dashboardGroupEntriesList) {
+            // ADD ASSOCIATE ELEMENT
             grp.setDashboardEntries(this.dashboardEntryService.readByGroupEntriesWithData(grp));
             response.add(this.dashboardGroupEntriesToDTO(grp));
         }
@@ -74,5 +71,15 @@ public class DashboardGroupEntriesService implements IDashboardGroupEntriesServi
         List<DashboardEntry> dashboardEntries = dashboardGroupEntries.getDashboardEntries();
         String sort = dashboardGroupEntries.getSort();
         return new DashboardGroupEntriesDTO(id, codeGroupEntries, dashboardEntries, sort, null);
+    }
+
+    @Override
+    public Integer create(String pCodeGroupeEntries, int pSort, int pDashboardUserId, int pReportItemType) {
+        return dashboardGroupEntriesDAO.create(pCodeGroupeEntries, pSort, pDashboardUserId, pReportItemType);
+    }
+
+    @Override
+    public String cleanByUser(User user) {
+        return dashboardGroupEntriesDAO.cleanByUser(user);
     }
 }

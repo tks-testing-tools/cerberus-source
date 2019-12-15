@@ -31,7 +31,11 @@ public interface IDashboardGroupEntriesService {
     public List<DashboardGroupEntries> readByUser(User user);
 
     public List<DashboardGroupEntriesDTO> readDashboard(User user);
-    
+
     public DashboardGroupEntriesDTO dashboardGroupEntriesToDTO(DashboardGroupEntries dashboardGroupEntries);
+
+    public Integer create(String pCodeGroupeEntries, int pSort, int pDashboardUserId, int pReportItemType);
+
+    public String cleanByUser(User user);
 
 }

@@ -17,10 +17,7 @@
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
 package org.cerberus.webservice;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -32,11 +29,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cerberus.crud.entity.DashboardEntry;
-import org.cerberus.crud.entity.DashboardGroupEntries;
 import org.cerberus.crud.entity.User;
-import org.cerberus.crud.factory.IFactoryDashboardEntry;
-import org.cerberus.crud.factory.IFactoryDashboardGroupEntries;
+import org.cerberus.crud.service.IDashboardEntryService;
 import org.cerberus.crud.service.IDashboardGroupEntriesService;
 import org.cerberus.crud.service.IUserService;
 import org.springframework.context.ApplicationContext;
@@ -52,10 +46,9 @@ public class DashboardWebService {
 
     private static final Logger LOG = LogManager.getLogger(DashboardWebService.class);
 
-    private IFactoryDashboardEntry factoryDashboardEntry;
-    private IFactoryDashboardGroupEntries factoryDashboardGroupEntries;
     private IUserService userService;
     private IDashboardGroupEntriesService dashboardGroupEntriesService;
+    private IDashboardEntryService dashboardEntryService;
     /*
      * return all dashboard entries classed sorted by dashboard group entries in map
      */
@@ -64,7 +57,6 @@ public class DashboardWebService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/poc")
     public Response poc(@Context ServletContext servletContext, @Context HttpServletRequest request) {
-        LOG.info("READ DASHBOARD");
         ApplicationContext appContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
         this.dashboardGroupEntriesService = appContext.getBean(IDashboardGroupEntriesService.class);
         this.userService = appContext.getBean(IUserService.class);
@@ -85,12 +77,41 @@ public class DashboardWebService {
                 .header("Access-Control-Allow-Credentials", "true")
                 .build();
     }
+    
+    
+        @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/poccreate")
+    public Response pocCreate(@Context ServletContext servletContext, @Context HttpServletRequest request) {
+        ApplicationContext appContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+        this.dashboardGroupEntriesService = appContext.getBean(IDashboardGroupEntriesService.class);
+
+        this.userService = appContext.getBean(IUserService.class);
+        User currentUser = new User();
+        String result = new String();
+        if (request.getRemoteUser() != null) {
+            try {
+                currentUser = userService.findUserByKey(request.getRemoteUser());
+                result = dashboardGroupEntriesService.cleanByUser(currentUser);
+                
+            } catch (Exception exception) {
+                LOG.error("Exception during read user process : ", exception);
+            }
+            return Response.ok(result).status(200)
+                    .header("Access-Control-Allow-Origin", "*")
+                    .header("Access-Control-Allow-Credentials", "true")
+                    .build();
+        }
+        return Response.ok("Unspecified user, please contact administrator").status(200)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Credentials", "true")
+                .build();
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/read")
     public Response readDashboard(@Context ServletContext servletContext, @Context HttpServletRequest request) {
-        LOG.info("READ DASHBOARD");
         return Response.ok("read dashboard actually not implemented").status(200)
                 .header("Access-Control-Allow-Origin", "*")
                 .header("Access-Control-Allow-Credentials", "true")
@@ -105,23 +126,7 @@ public class DashboardWebService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/update")
     public Response update(@Context ServletContext servletContext) {
-        LOG.info("UPDATE DASHBOARD");
         return Response.ok("update dashboard actually not implemented").status(200)
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Credentials", "true")
-                .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
-                .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD").build();
-    }
-
-    /*
-     * read existing report item sorted by type
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/readrepitem")
-    public Response readReportItem(@Context ServletContext servletContext) {
-        LOG.info("READ DASHBOARD");
-        return Response.ok("read dashboard actually not implemented").status(200)
                 .header("Access-Control-Allow-Origin", "*")
                 .header("Access-Control-Allow-Credentials", "true")
                 .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")

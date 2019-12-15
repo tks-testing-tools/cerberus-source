@@ -25,13 +25,14 @@ import org.cerberus.crud.dao.IDashboardEntryDAO;
 import org.cerberus.crud.dao.IDashboardEntryDataDAO;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroupEntries;
+import org.cerberus.crud.service.IDashboardEntryDataService;
 import org.cerberus.crud.service.IDashboardEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
  *
- * @author utilisateur
+ * @author cDelage
  */
 @Service
 public class DashboardEntryService implements IDashboardEntryService {
@@ -40,16 +41,16 @@ public class DashboardEntryService implements IDashboardEntryService {
 
     @Autowired
     private IDashboardEntryDAO dashboardEntryDAO;
-
+    
     @Autowired
-    private IDashboardEntryDataDAO dashboardEntryDataDAO;
+    private IDashboardEntryDataService dashboardEntryDataService;
 
     @Override
     public List<DashboardEntry> readByGroupEntriesWithData(DashboardGroupEntries dashboardGroupEntries) {
         List<DashboardEntry> response = new ArrayList();
         response = this.readByGroupEntries(dashboardGroupEntries);
         for (DashboardEntry ent : response) {
-            ent.setEntryData(this.dashboardEntryDataDAO.readDataForDashboardEntry(ent));
+            ent.setEntryData(this.dashboardEntryDataService.read(ent));
         }
         return response;
     }
@@ -58,4 +59,17 @@ public class DashboardEntryService implements IDashboardEntryService {
     public List<DashboardEntry> readByGroupEntries(DashboardGroupEntries dashboardGroupEntries) {
         return dashboardEntryDAO.readByGroupEntries(dashboardGroupEntries);
     }
+    
+    /**
+     * Create a dashboard entry
+     * @param pReportItemCode report item code string
+     * @param pParamId1 first param of the dashboard
+     * @param pParamId2 second param of the dashboard
+     * @return the new id group entries
+     */
+    @Override
+    public String create(int pIdGroupEntries,String pReportItemCode, String pParamId1, String pParamId2) {
+        return dashboardEntryDAO.create(pIdGroupEntries, pReportItemCode, pParamId1, pParamId2);
+    }
+    
 }

@@ -15,8 +15,9 @@
 
  You should have received a copy of the GNU General Public License
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
-package org.cerberus.crud.dao.impl;
+package org.cerberus.crud.dao.impl.dashboarditem;
 
+import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
@@ -27,28 +28,34 @@ import org.springframework.stereotype.Repository;
 
 /**
  *
- * @author cDelage
+ * @author CorentinDelage
  */
 @Repository
-public class DashboardEntryDataDAO implements IDashboardEntryDataDAO {
+public class DashboardCampaignEvolutionDAO implements IDashboardEntryDataDAO {
 
-    private static final Logger LOG = LogManager.getLogger(DashboardEntryDAO.class);
+    private static final Logger LOG = LogManager.getLogger(DashboardCampaignEvolutionDAO.class);
 
-    @Override
+    /**
+     * 
+     * @param dashboardEntry
+     * @return 
+     */
     public Map<String, Object> readDataForDashboardEntry(DashboardEntry dashboardEntry) {
+        LOG.debug("READ DATA FOR DASHBOARD ENTRY");
         Map<String, Object> response = new HashMap();
         try {
-            switch (dashboardEntry.getCodeReportItem()) {
-                case "CAMPAIGN_EVOLUTION":
-                    response.put("CAMPAIGN_EVOLUTION DATA", "data of campaign evolution");
-                    break;
-                default:
-                    response.put("INVALID_REPORT_ITEM", "Report item undefined in Read data dashboard entry DAO");
-            }
-        } catch (Exception exception) {
-            LOG.error("Catch exception during loading data : ", exception);
+            //Requete
+            response.put("Start", "Testvalues");
+        } catch (Exception e) {
+            LOG.error("Error to read campaign evolution, catch exception : ", e);
+            response.put("EXCEPTION", e);
         }
         return response;
-
     }
+
+    public Map<String, Object> loadFromResultSet(ResultSet rs) {
+        Map<String, Object> response = new HashMap();
+        return response;
+    }
+
 }

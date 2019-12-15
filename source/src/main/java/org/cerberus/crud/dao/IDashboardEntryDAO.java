@@ -29,7 +29,10 @@ import org.cerberus.crud.entity.DashboardGroupEntries;
  */
 public interface IDashboardEntryDAO {
 
-    public DashboardEntry loadFromResultSet(ResultSet rs) throws SQLException;
-    
     public List<DashboardEntry> readByGroupEntries(DashboardGroupEntries dashboardGroupEntries);
+
+    public String create(int pIdGroupEntries, String pReportItemCode, String pParamId1, String pParamId2);
+
+    public DashboardEntry loadFromResultSet(ResultSet rs) throws SQLException;
+
 }

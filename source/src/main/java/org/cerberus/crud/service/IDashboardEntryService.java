@@ -30,4 +30,6 @@ public interface IDashboardEntryService {
     public List<DashboardEntry> readByGroupEntries(DashboardGroupEntries dashboardGroupEntries);
 
     public List<DashboardEntry> readByGroupEntriesWithData(DashboardGroupEntries dashboardGroupEntries);
+
+    public String create(int pIdGroupEntries,String pReportItemCode, String pParamId1, String pParamId2);
 }
