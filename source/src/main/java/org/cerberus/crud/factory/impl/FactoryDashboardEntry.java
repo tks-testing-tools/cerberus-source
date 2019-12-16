@@ -15,7 +15,6 @@
 
  You should have received a copy of the GNU General Public License
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
-
 package org.cerberus.crud.factory.impl;
 
 import java.util.Map;
@@ -34,15 +33,12 @@ import org.springframework.stereotype.Service;
 public class FactoryDashboardEntry implements IFactoryDashboardEntry {
 
     private static final Logger LOG = LogManager.getLogger(FactoryDashboardEntry.class);
-    
+
     @Override
     public DashboardEntry create(String codeReportItem, @Nullable Map<String, Object> entryData, String paramFirst, String paramSecond) {
         DashboardEntry dashboardEntry = new DashboardEntry();
-        LOG.debug("Create dashboard entry : ", codeReportItem);
         dashboardEntry.setCodeReportItem(codeReportItem);
-        if (entryData != null) {
-            dashboardEntry.setEntryData(entryData);
-        }
+        dashboardEntry.setEntryData(entryData);
         dashboardEntry.setParamFirst(paramFirst);
         dashboardEntry.setParamSecond(paramSecond);
         return dashboardEntry;

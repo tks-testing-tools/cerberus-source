@@ -18,13 +18,16 @@
 package org.cerberus.crud.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cerberus.crud.dao.IDashboardGroupEntriesDAO;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroupEntries;
 import org.cerberus.crud.entity.User;
+import org.cerberus.crud.factory.IFactoryDashboardGroupEntries;
 import org.cerberus.crud.service.IDashboardEntryService;
 import org.cerberus.crud.service.IDashboardGroupEntriesService;
 import org.cerberus.dto.DashboardGroupEntriesDTO;
@@ -46,21 +49,25 @@ public class DashboardGroupEntriesService implements IDashboardGroupEntriesServi
     @Autowired
     private IDashboardEntryService dashboardEntryService;
 
+    @Autowired
+    private IFactoryDashboardGroupEntries factoryDashboardGroupEntries;
+
     @Override
     public List<DashboardGroupEntries> readByUser(User user) {
         return this.dashboardGroupEntriesDAO.readByUser(user);
     }
 
     @Override
-    public List<DashboardGroupEntriesDTO> readDashboard(User user) {
-        List<DashboardGroupEntriesDTO> response = new ArrayList();
-        List<DashboardGroupEntries> dashboardGroupEntriesList = new ArrayList();
-        dashboardGroupEntriesList = this.readByUser(user);
-        for (DashboardGroupEntries grp : dashboardGroupEntriesList) {
-            // ADD ASSOCIATE ELEMENT
+    public Map<String, Object> readDashboard(User user) {
+        Map<String, Object> response = new HashMap();
+        List<DashboardGroupEntriesDTO> dashboardGroupListDTO = new ArrayList();
+        List<DashboardGroupEntries> dashboardGroupList = new ArrayList();
+        dashboardGroupList = this.readByUser(user);
+        for (DashboardGroupEntries grp : dashboardGroupList) {
             grp.setDashboardEntries(this.dashboardEntryService.readByGroupEntriesWithData(grp));
-            response.add(this.dashboardGroupEntriesToDTO(grp));
+            dashboardGroupListDTO.add(this.dashboardGroupEntriesToDTO(grp));
         }
+        response.put("DashboardGroupEntriesList", dashboardGroupListDTO);
         return response;
     }
 
@@ -70,16 +77,28 @@ public class DashboardGroupEntriesService implements IDashboardGroupEntriesServi
         String codeGroupEntries = dashboardGroupEntries.getCodeGroupEntries();
         List<DashboardEntry> dashboardEntries = dashboardGroupEntries.getDashboardEntries();
         String sort = dashboardGroupEntries.getSort();
-        return new DashboardGroupEntriesDTO(id, codeGroupEntries, dashboardEntries, sort, null);
+        String type = dashboardGroupEntries.getType();
+        String associateElement = dashboardGroupEntries.getAssociateElement();
+        return new DashboardGroupEntriesDTO(id, codeGroupEntries, dashboardEntries, sort, associateElement, type);
+    }
+
+    public DashboardGroupEntries dashboardGroupEntriesFromDTO(DashboardGroupEntriesDTO dashboardGroupEntriesDTO, User user) {
+        String codeGroupEntries = dashboardGroupEntriesDTO.getCodeGroupEntries();
+        List<DashboardEntry> dashboardEntries = dashboardGroupEntriesDTO.getDashboardEntries();
+        String sort = dashboardGroupEntriesDTO.getSort();
+        String associateElement = dashboardGroupEntriesDTO.getAssociateElement();
+        String type = dashboardGroupEntriesDTO.getType();
+        return this.factoryDashboardGroupEntries.create(null, codeGroupEntries, user, dashboardEntries, sort, associateElement, type);
     }
 
     @Override
-    public Integer create(String pCodeGroupeEntries, int pSort, int pDashboardUserId, int pReportItemType) {
-        return dashboardGroupEntriesDAO.create(pCodeGroupeEntries, pSort, pDashboardUserId, pReportItemType);
+    public Integer create(String codeGroupEntries, int sort, int dashboardUserId, int reportItemType) {
+        return dashboardGroupEntriesDAO.create(codeGroupEntries, sort, dashboardUserId, reportItemType);
     }
 
     @Override
     public String cleanByUser(User user) {
         return dashboardGroupEntriesDAO.cleanByUser(user);
     }
+
 }

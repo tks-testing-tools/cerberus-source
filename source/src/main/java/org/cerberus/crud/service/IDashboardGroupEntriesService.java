@@ -18,6 +18,7 @@
 package org.cerberus.crud.service;
 
 import java.util.List;
+import java.util.Map;
 import org.cerberus.crud.entity.DashboardGroupEntries;
 import org.cerberus.crud.entity.User;
 import org.cerberus.dto.DashboardGroupEntriesDTO;
@@ -30,7 +31,7 @@ public interface IDashboardGroupEntriesService {
 
     public List<DashboardGroupEntries> readByUser(User user);
 
-    public List<DashboardGroupEntriesDTO> readDashboard(User user);
+    public Map<String, Object> readDashboard(User user);
 
     public DashboardGroupEntriesDTO dashboardGroupEntriesToDTO(DashboardGroupEntries dashboardGroupEntries);
 

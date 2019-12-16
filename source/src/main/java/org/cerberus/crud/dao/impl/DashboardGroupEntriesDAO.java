@@ -32,8 +32,10 @@ import org.cerberus.crud.entity.DashboardGroupEntries;
 import org.cerberus.crud.entity.User;
 import org.cerberus.crud.factory.IFactoryDashboardEntry;
 import org.cerberus.crud.factory.IFactoryDashboardGroupEntries;
+import org.cerberus.crud.service.ICampaignService;
 import org.cerberus.crud.service.IUserService;
 import org.cerberus.database.DatabaseSpring;
+import org.cerberus.enums.DashboardTypeReportItemEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -52,15 +54,12 @@ public class DashboardGroupEntriesDAO implements IDashboardGroupEntriesDAO {
     @Autowired
     private IFactoryDashboardGroupEntries factoryDashboardGroupEntries;
 
-    @Autowired
-    private IUserService userService;
-
     @Override
     public List<DashboardGroupEntries> readByUser(User user) {
         LOG.debug("DASHBOARD GROUP ENTRIES readByUser DAO");
         List<DashboardGroupEntries> response = new ArrayList();
         StringBuilder query = new StringBuilder();
-        query.append("SELECT `idGroupEntries`,`codeGroupEntries`,`sort`,`dashboardUserId`"
+        query.append("SELECT `idGroupEntries`,`codeGroupEntries`,`sort`,`dashboardUserId`,`associateElement`, `reportItemType` "
                 + "FROM `dashboardGroupEntries`"
                 + "WHERE `dashboardUserId`= ? ;");
 
@@ -84,13 +83,16 @@ public class DashboardGroupEntriesDAO implements IDashboardGroupEntriesDAO {
     public DashboardGroupEntries loadFromResultSet(ResultSet rs, User user) throws SQLException {
         DashboardGroupEntries response = new DashboardGroupEntries();
         Integer id = rs.getInt("idGroupEntries");
-        String codeGroupEntries = rs.getString("codeGroupeEntries");
+        String codeGroupEntries = rs.getString("codeGroupEntries");
         Integer sort = rs.getInt("sort");
-        return factoryDashboardGroupEntries.create(id, codeGroupEntries, user, null, sort.toString());
+        Integer typeId = rs.getInt("reportItemType");
+        String associateElement = rs.getString("associateElement");
+        String type = DashboardTypeReportItemEnum.getTypeReportName(typeId);
+        return factoryDashboardGroupEntries.create(id, codeGroupEntries, user, null, sort.toString(), associateElement, type);
     }
 
     @Override
-    public Integer create(String pCodeGroupeEntries, int pSort, int pDashboardUserId, int pReportItemType) {
+    public Integer create(String codeGroupEntries, int sort, int dashboardUserId, int reportItemType) {
         Integer result = 0;
         final String query = "INSERT INTO `dashboardGroupEntries`(`codeGroupEntries`, `sort`, `dashboardUserId`, `reportItemType`) VALUES (?,?,?,?)";
 
@@ -99,10 +101,10 @@ public class DashboardGroupEntriesDAO implements IDashboardGroupEntriesDAO {
             try {
                 PreparedStatement preStat = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
                 try {
-                    preStat.setString(1, pCodeGroupeEntries);
-                    preStat.setInt(2, pSort);
-                    preStat.setInt(3, pDashboardUserId);
-                    preStat.setInt(4, pReportItemType);
+                    preStat.setString(1, codeGroupEntries);
+                    preStat.setInt(2, sort);
+                    preStat.setInt(3, dashboardUserId);
+                    preStat.setInt(4, reportItemType);
                     preStat.execute();
                     ResultSet resultSet = preStat.getGeneratedKeys();
                     if (resultSet.first()) {
@@ -145,7 +147,7 @@ public class DashboardGroupEntriesDAO implements IDashboardGroupEntriesDAO {
                     response = "CLEAN DASHBOARD SUCESSFULLY";
                 } catch (SQLException exception) {
                     LOG.error("Unable to execute query : " + exception.toString());
-                    response = "FAIL TO CLEAN DASHBOARD CAUSE "+ exception.getLocalizedMessage();
+                    response = "FAIL TO CLEAN DASHBOARD CAUSE " + exception.getLocalizedMessage();
                 } finally {
                     preStat.close();
                 }
@@ -165,5 +167,4 @@ public class DashboardGroupEntriesDAO implements IDashboardGroupEntriesDAO {
         }
         return response;
     }
-
 }

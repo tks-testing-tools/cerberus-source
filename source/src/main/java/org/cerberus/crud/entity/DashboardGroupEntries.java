@@ -31,6 +31,8 @@ public class DashboardGroupEntries {
     private User user;
     private List<DashboardEntry> dashboardEntries;
     private String sort;
+    private String type;
+    private String associateElement;
 
     public Integer getId() {
         return id;
@@ -72,6 +74,22 @@ public class DashboardGroupEntries {
         this.sort = sort;
     }
 
+    public String getAssociateElement() {
+        return associateElement;
+    }
+
+    public void setAssociateElement(String associateElement) {
+        this.associateElement = associateElement;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+    
     @Override
     public boolean equals(Object other) {
         if (other == this) {

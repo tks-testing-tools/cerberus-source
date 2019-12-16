@@ -8364,11 +8364,16 @@ public class DatabaseVersioningService implements IDatabaseVersioningService {
                 + "	CONSTRAINT `FK_dashboardEntry_01` FOREIGN KEY (`idGroupEntries`) REFERENCES `dashboardGroupEntries` (`idGroupEntries`) ON DELETE CASCADE ON UPDATE CASCADE,"
                 + "	CONSTRAINT `FK_dashboardEntry_02` FOREIGN KEY (`reportItemCode`) REFERENCES `dashboardReportItem` (`reportItemCode`)"
                 + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-        
+
         a.add("ALTER TABLE `dashboardReportItem` DROP COLUMN `isConfigurable`;");
-       
+
         a.add("ALTER TABLE `dashboardGroupEntries` CHANGE `codeGroupeEntries` `codeGroupEntries` varchar(50);");
+
+        a.add("DROP TABLE `dashboardGroupEntriesCampaign`;");
+
+        a.add("DROP TABLE `dashboardGroupEntriesApplication`;");
         
+        a.add("ALTER TABLE `dashboardGroupEntries` add `associateElement` VARCHAR(250) NULL;");
         return a;
     }
 

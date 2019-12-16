@@ -36,13 +36,15 @@ public class DashboardGroupEntriesDTO {
     private List<DashboardEntry> dashboardEntries;
     private String sort;
     private String associateElement;
+    private String type;
 
-    public DashboardGroupEntriesDTO(Integer id, String codeGroupEntries, List<DashboardEntry> dashboardEntries, String sort,@Nullable String associateElement) {
+    public DashboardGroupEntriesDTO(@Nullable Integer id, String codeGroupEntries, List<DashboardEntry> dashboardEntries, String sort,@Nullable String associateElement, String type) {
         this.id = id;
         this.codeGroupEntries = codeGroupEntries;
         this.dashboardEntries = dashboardEntries;
         this.sort = sort;
         this.associateElement = associateElement;
+        this.type = type;
     }
 
     public Integer getId() {
@@ -83,6 +85,14 @@ public class DashboardGroupEntriesDTO {
 
     public void setAssociateElement(String associateElement) {
         this.associateElement = associateElement;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
     
     
