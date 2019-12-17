@@ -23,9 +23,9 @@ package org.cerberus.enums;
  */
 public enum DashboardReportItemEnum {
 
-    NOT_VALID("NOT_VALID", "Not valid report item", "DISABLE", "" , "DISABLE", "" , 0),
-    CAMPAIGN_EVOLUTION("CAMPAIGN_EVOLUTION", "campaign evolution" , "Start date", "DATE", "End date", "DATE" , 1),
-    CAMPAIGN_LAST_REPORT("CAMPAIGN_LAST_REPORT", "Last report detail campaign", "DISABLE", "", "DISABLE", "", 1);
+    NOT_VALID("NOT_VALID", "Not valid report item", "DISABLE", "" , "DISABLE", "" , DashboardTypeReportItemEnum.NOT_VALID),
+    CAMPAIGN_EVOLUTION("CAMPAIGN_EVOLUTION", "campaign evolution" , "Start date", "DATE", "End date", "DATE" , DashboardTypeReportItemEnum.CAMPAIGN),
+    CAMPAIGN_LAST_REPORT("CAMPAIGN_LAST_REPORT_DETAIL", "Last report detail campaign", "DISABLE", "", "DISABLE", "", DashboardTypeReportItemEnum.CAMPAIGN);
 
     private String reportItemCode;
     private String reportItemTitle;
@@ -33,16 +33,16 @@ public enum DashboardReportItemEnum {
     private String paramType1;
     private String param2;
     private String paramType2;
-    private int reportItemType;
+    private DashboardTypeReportItemEnum type;
 
-    private DashboardReportItemEnum(String reportItemCode, String reportItemTitle, String param1, String paramType1, String param2, String paramType2, int reportItemType) {
+    private DashboardReportItemEnum(String reportItemCode, String reportItemTitle, String param1, String paramType1, String param2, String paramType2, DashboardTypeReportItemEnum type) {
         this.reportItemCode = reportItemCode;
         this.reportItemTitle = reportItemTitle;
         this.param1 = param1;
         this.paramType1 = paramType1;
         this.param2 = param2;
         this.paramType2 = paramType2;
-        this.reportItemType = reportItemType;
+        this.type = type;
     }
 
     public String getReportItemCode() {
@@ -93,13 +93,11 @@ public enum DashboardReportItemEnum {
         this.paramType2 = paramType2;
     }
 
-    public int getReportItemType() {
-        return reportItemType;
+    public DashboardTypeReportItemEnum getType() {
+        return type;
     }
 
-    public void setReportItemType(int reportItemType) {
-        this.reportItemType = reportItemType;
+    public void setType(DashboardTypeReportItemEnum type) {
+        this.type = type;
     }
-
-    
 }

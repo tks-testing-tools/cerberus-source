@@ -74,26 +74,24 @@ public class DashboardGroupEntriesService implements IDashboardGroupEntriesServi
     @Override
     public DashboardGroupEntriesDTO dashboardGroupEntriesToDTO(DashboardGroupEntries dashboardGroupEntries) {
         Integer id = dashboardGroupEntries.getId();
-        String codeGroupEntries = dashboardGroupEntries.getCodeGroupEntries();
         List<DashboardEntry> dashboardEntries = dashboardGroupEntries.getDashboardEntries();
         String sort = dashboardGroupEntries.getSort();
         String type = dashboardGroupEntries.getType();
         String associateElement = dashboardGroupEntries.getAssociateElement();
-        return new DashboardGroupEntriesDTO(id, codeGroupEntries, dashboardEntries, sort, associateElement, type);
+        return new DashboardGroupEntriesDTO(id, dashboardEntries, sort, associateElement, type);
     }
 
     public DashboardGroupEntries dashboardGroupEntriesFromDTO(DashboardGroupEntriesDTO dashboardGroupEntriesDTO, User user) {
-        String codeGroupEntries = dashboardGroupEntriesDTO.getCodeGroupEntries();
         List<DashboardEntry> dashboardEntries = dashboardGroupEntriesDTO.getDashboardEntries();
         String sort = dashboardGroupEntriesDTO.getSort();
         String associateElement = dashboardGroupEntriesDTO.getAssociateElement();
         String type = dashboardGroupEntriesDTO.getType();
-        return this.factoryDashboardGroupEntries.create(null, codeGroupEntries, user, dashboardEntries, sort, associateElement, type);
+        return this.factoryDashboardGroupEntries.create(null, user, dashboardEntries, sort, associateElement, type);
     }
 
     @Override
-    public Integer create(String codeGroupEntries, int sort, int dashboardUserId, int reportItemType) {
-        return dashboardGroupEntriesDAO.create(codeGroupEntries, sort, dashboardUserId, reportItemType);
+    public Integer create(int sort, int dashboardUserId, String type, String associateElement) {
+        return dashboardGroupEntriesDAO.create(sort, dashboardUserId, type, associateElement);
     }
 
     @Override

@@ -35,7 +35,7 @@ public interface IDashboardGroupEntriesService {
 
     public DashboardGroupEntriesDTO dashboardGroupEntriesToDTO(DashboardGroupEntries dashboardGroupEntries);
 
-    public Integer create(String pCodeGroupeEntries, int pSort, int pDashboardUserId, int pReportItemType);
+    public Integer create(int sort, int dashboardUserId, String type, String associateElement);
 
     public String cleanByUser(User user);
 

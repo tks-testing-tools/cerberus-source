@@ -20,6 +20,7 @@ package org.cerberus.crud.dao;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import javax.annotation.Nullable;
 import org.cerberus.crud.entity.DashboardGroupEntries;
 import org.cerberus.crud.entity.User;
 
@@ -33,7 +34,7 @@ public interface IDashboardGroupEntriesDAO {
 
     public DashboardGroupEntries loadFromResultSet(ResultSet rs, User user) throws SQLException;
 
-    public Integer create(String codeGroupeEntries, int sort, int dashboardUserId, int reportItemType);
+    public Integer create(int sort, int dashboardUserId, String type,@Nullable String associateElement);
 
     public String cleanByUser(User user);
 

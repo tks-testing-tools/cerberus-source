@@ -23,49 +23,21 @@ package org.cerberus.enums;
  */
 public enum DashboardTypeReportItemEnum {
 
-    NOT_VALID(0, "INVALID_TYPE_REPORT_ITEM", "invalid Report item"),
-    CAMPAING(1, "CAMPAIGN", "Report-Item associés aux campagnes"),
-    CAMPAING_GROUP(2, "CAMPAIGN_GROUP", "Report-Item associés aux campagnes"),
-    APPLICATION(3, "APPLICATION", "Report-Item associés aux campagnes"),
-    GENERIC(4, "GENERIC", "Report-Item associés aux campagnes"),
-    ENVIRONMENT(5, "ENVIRONMENT", "Report-Item associés aux campagnes");
+    NOT_VALID("INVALID_TYPE_REPORT_ITEM", "invalid Report item"),
+    CAMPAIGN("CAMPAIGN", "Report-Item associés aux campagnes"),
+    CAMPAING_GROUP("CAMPAIGN_GROUP", "Report-Item associés aux campagnes"),
+    APPLICATION("APPLICATION", "Report-Item associés aux campagnes"),
+    GENERIC("GENERIC", "Report-Item associés aux campagnes"),
+    ENVIRONMENT("ENVIRONMENT", "Report-Item associés aux campagnes");
 
-    private int idTypeReportItem;
     private String codeReportItem;
     private String descReportItem;
 
-    private DashboardTypeReportItemEnum(int idTypeReportItem, String codeReportItem, String descReportItem) {
-        this.idTypeReportItem = idTypeReportItem;
+    private DashboardTypeReportItemEnum( String codeReportItem, String descReportItem) {
         this.codeReportItem = codeReportItem;
         this.descReportItem = descReportItem;
     }
-
-    public static int getTypeReportItemID(String codeReportItem) {
-        for (DashboardTypeReportItemEnum en : values()) {
-            if (en.getCodeReportItem().compareTo(codeReportItem) == 0) {
-                return en.getIdTypeReportItem();
-            }
-        }
-        return NOT_VALID.getIdTypeReportItem();
-    }
-
-    public static String getTypeReportName(int typeReportItemId) {
-        for (DashboardTypeReportItemEnum en : values()) {
-            if (en.getIdTypeReportItem()== typeReportItemId) {
-                return en.getCodeReportItem();
-            }
-        }
-        return NOT_VALID.getCodeReportItem();
-    }
     
-    public static String getTypeReportDescById(int typeReportItemId) {
-        for (DashboardTypeReportItemEnum en : values()) {
-            if (en.getIdTypeReportItem()== typeReportItemId) {
-                return en.getDescReportItem();
-            }
-        }
-        return NOT_VALID.getDescReportItem();
-    }
     
         public static String getTypeReportItemByName(String codeReportItem) {
         for (DashboardTypeReportItemEnum en : values()) {
@@ -74,14 +46,6 @@ public enum DashboardTypeReportItemEnum {
             }
         }
         return NOT_VALID.getDescReportItem();
-    }
-    
-    public int getIdTypeReportItem() {
-        return idTypeReportItem;
-    }
-
-    public void setIdTypeReportItem(int idTypeReportItem) {
-        this.idTypeReportItem = idTypeReportItem;
     }
 
     public String getCodeReportItem() {

@@ -24,24 +24,21 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cerberus.crud.dao.IDashboardGroupEntriesDAO;
-import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroupEntries;
 import org.cerberus.crud.entity.User;
-import org.cerberus.crud.factory.IFactoryDashboardEntry;
 import org.cerberus.crud.factory.IFactoryDashboardGroupEntries;
-import org.cerberus.crud.service.ICampaignService;
-import org.cerberus.crud.service.IUserService;
 import org.cerberus.database.DatabaseSpring;
-import org.cerberus.enums.DashboardTypeReportItemEnum;
+import org.cerberus.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /**
  *
- * @author utilisateur
+ * @author cDelage
  */
 @Repository
 public class DashboardGroupEntriesDAO implements IDashboardGroupEntriesDAO {
@@ -59,7 +56,7 @@ public class DashboardGroupEntriesDAO implements IDashboardGroupEntriesDAO {
         LOG.debug("DASHBOARD GROUP ENTRIES readByUser DAO");
         List<DashboardGroupEntries> response = new ArrayList();
         StringBuilder query = new StringBuilder();
-        query.append("SELECT `idGroupEntries`,`codeGroupEntries`,`sort`,`dashboardUserId`,`associateElement`, `reportItemType` "
+        query.append("SELECT `idGroupEntries`,`sort`,`dashboardUserId`,`associateElement`, `type` "
                 + "FROM `dashboardGroupEntries`"
                 + "WHERE `dashboardUserId`= ? ;");
 
@@ -81,30 +78,32 @@ public class DashboardGroupEntriesDAO implements IDashboardGroupEntriesDAO {
 
     @Override
     public DashboardGroupEntries loadFromResultSet(ResultSet rs, User user) throws SQLException {
-        DashboardGroupEntries response = new DashboardGroupEntries();
         Integer id = rs.getInt("idGroupEntries");
-        String codeGroupEntries = rs.getString("codeGroupEntries");
         Integer sort = rs.getInt("sort");
-        Integer typeId = rs.getInt("reportItemType");
+        String type = rs.getString("type");
         String associateElement = rs.getString("associateElement");
-        String type = DashboardTypeReportItemEnum.getTypeReportName(typeId);
-        return factoryDashboardGroupEntries.create(id, codeGroupEntries, user, null, sort.toString(), associateElement, type);
+        return factoryDashboardGroupEntries.create(id, user, null, sort.toString(), associateElement, type);
     }
 
     @Override
-    public Integer create(String codeGroupEntries, int sort, int dashboardUserId, int reportItemType) {
+    public Integer create(int sort, int dashboardUserId, String type,@Nullable String associateElement) {
         Integer result = 0;
-        final String query = "INSERT INTO `dashboardGroupEntries`(`codeGroupEntries`, `sort`, `dashboardUserId`, `reportItemType`) VALUES (?,?,?,?)";
+        final String query = "INSERT INTO `dashboardGroupEntries`(`sort`, `dashboardUserId`, `type`,`associateElement`) VALUES (?,?,?,?)";
 
         try {
             Connection connection = databaseSpring.connect();
             try {
                 PreparedStatement preStat = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
                 try {
-                    preStat.setString(1, codeGroupEntries);
-                    preStat.setInt(2, sort);
-                    preStat.setInt(3, dashboardUserId);
-                    preStat.setInt(4, reportItemType);
+
+                    preStat.setInt(1, sort);
+                    preStat.setInt(2, dashboardUserId);
+                    preStat.setString(3, type);
+                    if (!StringUtil.isNullOrEmpty(associateElement)) {
+                        preStat.setString(4, associateElement);
+                    }else{
+                        preStat.setString(4, "");
+                    }
                     preStat.execute();
                     ResultSet resultSet = preStat.getGeneratedKeys();
                     if (resultSet.first()) {

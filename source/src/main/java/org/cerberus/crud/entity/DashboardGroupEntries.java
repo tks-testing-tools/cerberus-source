@@ -27,7 +27,6 @@ import java.util.Objects;
 public class DashboardGroupEntries {
 
     private Integer id;
-    private String codeGroupEntries;
     private User user;
     private List<DashboardEntry> dashboardEntries;
     private String sort;
@@ -40,14 +39,6 @@ public class DashboardGroupEntries {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-    
-    public String getCodeGroupEntries() {
-        return codeGroupEntries;
-    }
-
-    public void setCodeGroupEntries(String codeGroupEntries) {
-        this.codeGroupEntries = codeGroupEntries;
     }
 
     public User getUser() {
@@ -89,24 +80,4 @@ public class DashboardGroupEntries {
     public void setType(String type) {
         this.type = type;
     }
-    
-    @Override
-    public boolean equals(Object other) {
-        if (other == this) {
-            return true;
-        }
-        if (!(other instanceof DashboardGroupEntries)) {
-            return false;
-        }
-        DashboardGroupEntries otherObject = (DashboardGroupEntries) other;
-        boolean sameCode = otherObject.getCodeGroupEntries().equalsIgnoreCase(this.getCodeGroupEntries());
-        boolean sameUser = otherObject.getUser().equals(this.user);
-        return sameCode && sameUser;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(codeGroupEntries, user);
-    }
-
 }

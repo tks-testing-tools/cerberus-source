@@ -8365,15 +8365,34 @@ public class DatabaseVersioningService implements IDatabaseVersioningService {
                 + "	CONSTRAINT `FK_dashboardEntry_02` FOREIGN KEY (`reportItemCode`) REFERENCES `dashboardReportItem` (`reportItemCode`)"
                 + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
-        a.add("ALTER TABLE `dashboardReportItem` DROP COLUMN `isConfigurable`;");
-
-        a.add("ALTER TABLE `dashboardGroupEntries` CHANGE `codeGroupeEntries` `codeGroupEntries` varchar(50);");
-
         a.add("DROP TABLE `dashboardGroupEntriesCampaign`;");
 
         a.add("DROP TABLE `dashboardGroupEntriesApplication`;");
-        
+
         a.add("ALTER TABLE `dashboardGroupEntries` add `associateElement` VARCHAR(250) NULL;");
+
+        a.add("ALTER TABLE `dashboardReportItem` DROP FOREIGN KEY `FK_typeReportItem_01`;");
+
+        a.add("ALTER TABLE `dashboardGroupEntries` DROP FOREIGN KEY `FK_dashboardGroup_02`; ");
+
+        a.add("ALTER TABLE `dashboardGroupEntries` DROP `reportItemType`, DROP `codeGroupeEntries`;");
+
+        a.add("ALTER TABLE `dashboardReportItem` DROP `reportItemType`, DROP `isConfigurable`;");
+
+        a.add("ALTER TABLE `dashboardTypeReportItem` DROP `idTypeRepItem`;");
+
+        a.add("ALTER TABLE `dashboardTypeReportItem` add primary key(`codeTypeRepItem`);");
+
+        a.add("ALTER TABLE `dashboardReportItem` add `type` varchar(50);");
+
+        a.add("ALTER TABLE `dashboardGroupEntries` add `type` varchar (50);");
+
+        a.add("ALTER TABLE dashboardReportItem ADD CONSTRAINT `fk_dashboardGroupEntries_03` FOREIGN KEY (`type`) REFERENCES dashboardTypeReportItem(`codeTypeRepItem`);");
+
+        a.add("ALTER TABLE dashboardReportItem ADD CONSTRAINT `fk_dashboardreportitem_01` FOREIGN KEY (`type`) REFERENCES dashboardTypeReportItem(`codeTypeRepItem`);");
+        
+        a.add("UPDATE `dashboardReportItem` SET type='CAMPAIGN' WHERE `reportItemCode` = 'CAMPAIGN_EVOLUTION';");
+       
         return a;
     }
 

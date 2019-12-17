@@ -38,9 +38,8 @@ public class DashboardGroupEntriesDTO {
     private String associateElement;
     private String type;
 
-    public DashboardGroupEntriesDTO(@Nullable Integer id, String codeGroupEntries, List<DashboardEntry> dashboardEntries, String sort,@Nullable String associateElement, String type) {
+    public DashboardGroupEntriesDTO(@Nullable Integer id,List<DashboardEntry> dashboardEntries, String sort,@Nullable String associateElement, String type) {
         this.id = id;
-        this.codeGroupEntries = codeGroupEntries;
         this.dashboardEntries = dashboardEntries;
         this.sort = sort;
         this.associateElement = associateElement;
@@ -53,14 +52,6 @@ public class DashboardGroupEntriesDTO {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public String getCodeGroupEntries() {
-        return codeGroupEntries;
-    }
-
-    public void setCodeGroupEntries(String codeGroupEntries) {
-        this.codeGroupEntries = codeGroupEntries;
     }
 
     public List<DashboardEntry> getDashboardEntries() {
