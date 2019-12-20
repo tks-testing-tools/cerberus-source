@@ -21,7 +21,7 @@ package org.cerberus.crud.factory;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.cerberus.crud.entity.DashboardEntry;
-import org.cerberus.crud.entity.DashboardGroupEntries;
+import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.entity.User;
 
 /**
@@ -30,7 +30,7 @@ import org.cerberus.crud.entity.User;
  */
 
 
-public interface IFactoryDashboardGroupEntries {
+public interface IFactoryDashboardGroup {
     
-    public DashboardGroupEntries create(@Nullable Integer id, User user, @Nullable List<DashboardEntry> dashboardEntries, String sort, String associateElement, @Nullable String type);
+    public DashboardGroup create(@Nullable Integer id, User user, @Nullable List<DashboardEntry> dashboardEntries, String sort, String associateElement, @Nullable String type);
 }

@@ -17,7 +17,8 @@
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
 package org.cerberus.webservice;
 
-
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -31,7 +32,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cerberus.crud.entity.User;
 import org.cerberus.crud.service.IDashboardEntryService;
-import org.cerberus.crud.service.IDashboardGroupEntriesService;
+import org.cerberus.crud.service.IDashboardGroupService;
 import org.cerberus.crud.service.IUserService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -47,7 +48,7 @@ public class DashboardWebService {
     private static final Logger LOG = LogManager.getLogger(DashboardWebService.class);
 
     private IUserService userService;
-    private IDashboardGroupEntriesService dashboardGroupEntriesService;
+    private IDashboardGroupService dashboardGroupEntriesService;
     private IDashboardEntryService dashboardEntryService;
     /*
      * return all dashboard entries classed sorted by dashboard group entries in map
@@ -58,7 +59,7 @@ public class DashboardWebService {
     @Path("/poc")
     public Response poc(@Context ServletContext servletContext, @Context HttpServletRequest request) {
         ApplicationContext appContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-        this.dashboardGroupEntriesService = appContext.getBean(IDashboardGroupEntriesService.class);
+        this.dashboardGroupEntriesService = appContext.getBean(IDashboardGroupService.class);
         this.userService = appContext.getBean(IUserService.class);
         User currentUser = new User();
         if (request.getRemoteUser() != null) {
@@ -77,23 +78,22 @@ public class DashboardWebService {
                 .header("Access-Control-Allow-Credentials", "true")
                 .build();
     }
-    
-    
-        @GET
+
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/poccreate")
     public Response pocCreate(@Context ServletContext servletContext, @Context HttpServletRequest request) {
         ApplicationContext appContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-        this.dashboardGroupEntriesService = appContext.getBean(IDashboardGroupEntriesService.class);
+        this.dashboardGroupEntriesService = appContext.getBean(IDashboardGroupService.class);
 
         this.userService = appContext.getBean(IUserService.class);
         User currentUser = new User();
-        String result = new String();
+        Map<String, Object> result = new HashMap();
         if (request.getRemoteUser() != null) {
             try {
                 currentUser = userService.findUserByKey(request.getRemoteUser());
                 result = dashboardGroupEntriesService.cleanByUser(currentUser);
-                
+
             } catch (Exception exception) {
                 LOG.error("Exception during read user process : ", exception);
             }

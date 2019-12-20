@@ -26,17 +26,26 @@
  */
 public class DashboardEntry {
 
-    private String codeReportItem;
+    private Integer idGroup;
+    private String codeIndicator;
     private Map<String, Object> entryData;
-    private String paramFirst;
-    private String paramSecond;
+    private String param1Val;
+    private String param2Val;
 
-    public String getCodeReportItem() {
-        return codeReportItem;
+    public Integer getIdGroup() {
+        return idGroup;
     }
 
-    public void setCodeReportItem(String codeReportItem) {
-        this.codeReportItem = codeReportItem;
+    public void setIdGroup(Integer idGroup) {
+        this.idGroup = idGroup;
+    }
+
+    public String getCodeIndicator() {
+        return codeIndicator;
+    }
+
+    public void setCodeIndicator(String codeIndicator) {
+        this.codeIndicator = codeIndicator;
     }
 
     public Map<String, Object> getEntryData() {
@@ -47,20 +56,22 @@ public class DashboardEntry {
         this.entryData = entryData;
     }
 
-    public String getParamFirst() {
-        return paramFirst;
+    public String getParam1Val() {
+        return param1Val;
     }
 
-    public void setParamFirst(String paramFirst) {
-        this.paramFirst = paramFirst;
+    public void setParam1Val(String param1Val) {
+        this.param1Val = param1Val;
     }
 
-    public String getParamSecond() {
-        return paramSecond;
+    public String getParam2Val() {
+        return param2Val;
     }
 
-    public void setParamSecond(String paramSecond) {
-        this.paramSecond = paramSecond;
+    public void setParam2Val(String param2Val) {
+        this.param2Val = param2Val;
     }
+
+    
 
 }

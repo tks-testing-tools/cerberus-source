@@ -22,9 +22,8 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cerberus.crud.dao.IDashboardEntryDAO;
-import org.cerberus.crud.dao.IDashboardEntryDataDAO;
 import org.cerberus.crud.entity.DashboardEntry;
-import org.cerberus.crud.entity.DashboardGroupEntries;
+import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.service.IDashboardEntryDataService;
 import org.cerberus.crud.service.IDashboardEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +45,7 @@ public class DashboardEntryService implements IDashboardEntryService {
     private IDashboardEntryDataService dashboardEntryDataService;
 
     @Override
-    public List<DashboardEntry> readByGroupEntriesWithData(DashboardGroupEntries dashboardGroupEntries) {
+    public List<DashboardEntry> readByGroupEntriesWithData(DashboardGroup dashboardGroupEntries) {
         List<DashboardEntry> response = new ArrayList();
         response = this.readByGroupEntries(dashboardGroupEntries);
         for (DashboardEntry ent : response) {
@@ -56,20 +55,18 @@ public class DashboardEntryService implements IDashboardEntryService {
     }
 
     @Override
-    public List<DashboardEntry> readByGroupEntries(DashboardGroupEntries dashboardGroupEntries) {
+    public List<DashboardEntry> readByGroupEntries(DashboardGroup dashboardGroupEntries) {
         return dashboardEntryDAO.readByGroupEntries(dashboardGroupEntries);
     }
     
     /**
      * Create a dashboard entry
-     * @param pReportItemCode report item code string
-     * @param pParamId1 first param of the dashboard
-     * @param pParamId2 second param of the dashboard
-     * @return the new id group entries
+     * @param dashboard entry
+     * @return message
      */
     @Override
-    public String create(int pIdGroupEntries,String pReportItemCode, String pParamId1, String pParamId2) {
-        return dashboardEntryDAO.create(pIdGroupEntries, pReportItemCode, pParamId1, pParamId2);
+    public String create(DashboardEntry dashboardEntry) {
+        return dashboardEntryDAO.create(dashboardEntry);
     }
     
 }

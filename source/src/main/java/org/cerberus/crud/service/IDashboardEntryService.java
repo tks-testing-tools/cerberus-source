@@ -19,7 +19,8 @@ package org.cerberus.crud.service;
 
 import java.util.List;
 import org.cerberus.crud.entity.DashboardEntry;
-import org.cerberus.crud.entity.DashboardGroupEntries;
+import org.cerberus.crud.entity.DashboardGroup;
+import org.cerberus.dto.DashboardGroupDTO;
 
 /**
  *
@@ -27,9 +28,10 @@ import org.cerberus.crud.entity.DashboardGroupEntries;
  */
 public interface IDashboardEntryService {
 
-    public List<DashboardEntry> readByGroupEntries(DashboardGroupEntries dashboardGroupEntries);
+    public List<DashboardEntry> readByGroupEntries(DashboardGroup dashboardGroupEntries);
 
-    public List<DashboardEntry> readByGroupEntriesWithData(DashboardGroupEntries dashboardGroupEntries);
+    public List<DashboardEntry> readByGroupEntriesWithData(DashboardGroup dashboardGroupEntries);
 
-    public String create(int pIdGroupEntries,String pReportItemCode, String pParamId1, String pParamId2);
+    public String create(DashboardEntry dashboardEntry);
+    
 }

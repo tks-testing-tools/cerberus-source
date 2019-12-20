@@ -15,27 +15,31 @@
 
  You should have received a copy of the GNU General Public License
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
-package org.cerberus.crud.dao;
+package org.cerberus.crud.service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
-import javax.annotation.Nullable;
-import org.cerberus.crud.entity.DashboardGroupEntries;
+import java.util.Map;
+import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.entity.User;
+import org.cerberus.dto.DashboardGroupDTO;
+import org.cerberus.dto.DashboardTypeIndicatorDTO;
+import org.cerberus.engine.entity.MessageEvent;
 
 /**
  *
  * @author utilisateur
  */
-public interface IDashboardGroupEntriesDAO {
+public interface IDashboardGroupService {
 
-    public List<DashboardGroupEntries> readByUser(User user);
+    public List<DashboardGroup> readByUser(User user);
 
-    public DashboardGroupEntries loadFromResultSet(ResultSet rs, User user) throws SQLException;
+    public Map<String, Object> readDashboard(User user);
 
-    public Integer create(int sort, int dashboardUserId, String type,@Nullable String associateElement);
+    public DashboardGroupDTO dashboardGroupEntriesToDTO(DashboardGroup dashboardGroupEntries);
 
-    public String cleanByUser(User user);
+    public Integer create(DashboardGroup dashboardGroup);
 
+    public Map<String, Object> cleanByUser(User user);
+
+    public List<DashboardTypeIndicatorDTO> readDashboardPossibility();
 }

@@ -15,23 +15,31 @@
 
  You should have received a copy of the GNU General Public License
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
-package org.cerberus.crud.entity;
+package org.cerberus.dto;
 
 import java.util.List;
-import java.util.Objects;
+import javax.annotation.Nullable;
+import org.cerberus.crud.entity.DashboardEntry;
 
 /**
  *
- * @author utilisateur
+ * @author cDelage
  */
-public class DashboardGroupEntries {
+public class DashboardGroupDTO {
 
     private Integer id;
-    private User user;
-    private List<DashboardEntry> dashboardEntries;
     private String sort;
-    private String type;
     private String associateElement;
+    private String type;
+    private List<DashboardEntry> dashboardEntries;
+
+    public DashboardGroupDTO(@Nullable Integer id, List<DashboardEntry> dashboardEntries, String sort, @Nullable String associateElement, String type) {
+        this.id = id;
+        this.dashboardEntries = dashboardEntries;
+        this.sort = sort;
+        this.associateElement = associateElement;
+        this.type = type;
+    }
 
     public Integer getId() {
         return id;
@@ -39,14 +47,6 @@ public class DashboardGroupEntries {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public List<DashboardEntry> getDashboardEntries() {
@@ -80,4 +80,5 @@ public class DashboardGroupEntries {
     public void setType(String type) {
         this.type = type;
     }
+
 }

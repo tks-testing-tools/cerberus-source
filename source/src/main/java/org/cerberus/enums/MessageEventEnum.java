@@ -1,21 +1,20 @@
 /**
- * Cerberus Copyright (C) 2013 - 2017 cerberustesting
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ * Cerberus Copyright (C) 2013 - 2017 cerberustesting DO NOT ALTER OR REMOVE
+ * COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This file is part of Cerberus.
  *
- * Cerberus is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Cerberus is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * Cerberus is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Cerberus is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * Cerberus. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.cerberus.enums;
 
@@ -495,6 +494,19 @@ public enum MessageEventEnum {
     SCHEDULER_DELETE_OK(401, MessageCodeEnum.GENERIC_CODE_SUCCESS.getCodeString(), "schedule entry for %ITEM% was delete with success!", false, false, false, MessageGeneralEnum.DATA_OPERATION_SUCCESS),
     SCHEDULER_NO_DATA_FOUND(402, MessageCodeEnum.GENERIC_CODE_WARNING.getCodeString(), "Could not find any data that match the required criteria to create Schedule entry.", true, true, false, MessageGeneralEnum.DATA_OPERATION_SUCCESS),
     SCHEDULER_ERROR_EXPECTED(403, MessageCodeEnum.GENERIC_CODE_ERROR.getCodeString(), "%ITEM% - schedule entry %OPERATION% failed to complete. %REASON%", false, false, false, MessageGeneralEnum.DATA_OPERATION_ERROR),
+    // ********* DASHBOARD ******
+    DASHBOARD_UPDATE_SUCCESS(200, MessageCodeEnum.GENERIC_CODE_SUCCESS.getCodeString(), "Sucess to create dashboard group entries", false, false, false, MessageGeneralEnum.DATA_OPERATION_SUCCESS),
+    DASHBOARD_DELETE_SUCCESS(200, MessageCodeEnum.GENERIC_CODE_SUCCESS.getCodeString(), "Sucess to delete dashboard group entries", false, false, false, MessageGeneralEnum.DATA_OPERATION_SUCCESS),
+    DASHBOARD_READ_GROUP_SUCCESS(200, MessageCodeEnum.GENERIC_CODE_SUCCESS.getCodeString(), "Sucess to read dashboard group entries", false, false, false, MessageGeneralEnum.DATA_OPERATION_SUCCESS),
+    DASHBOARD_READ_AVAILABILITY_SUCCESS(200, MessageCodeEnum.GENERIC_CODE_SUCCESS.getCodeString(), "Sucess to read dashboard possibility", false, false, false, MessageGeneralEnum.DATA_OPERATION_SUCCESS),
+    DASHBOARD_READ_DATA_SUCCESS(200, MessageCodeEnum.GENERIC_CODE_SUCCESS.getCodeString(), "Sucess to read dashboard group entries", false, false, false, MessageGeneralEnum.DATA_OPERATION_SUCCESS),
+    DASHBOARD_READ_AVAILABILITY_FAILED(400, MessageCodeEnum.GENERIC_CODE_ERROR.getCodeString(), "Failed to read possibility of dashboard", false, false, false, MessageGeneralEnum.DATA_OPERATION_ERROR),
+    DASHBOARD_CREATE_GROUP_FAILED(400, MessageCodeEnum.GENERIC_CODE_ERROR.getCodeString(), "Failed to create dashboard group entries", false, false, false, MessageGeneralEnum.DATA_OPERATION_ERROR),
+    DASHBOARD_DELETE_GROUP_FAILED(400, MessageCodeEnum.GENERIC_CODE_ERROR.getCodeString(), "Failed to delete dashboard group entries", false, false, false, MessageGeneralEnum.DATA_OPERATION_ERROR),
+    DASHBOARD_READ_GROUP_FAILED(400, MessageCodeEnum.GENERIC_CODE_ERROR.getCodeString(), "Failed to read dashboard group entries", false, false, false, MessageGeneralEnum.DATA_OPERATION_ERROR),
+    DASHBOARD_READ_DATA_FAILED(400, MessageCodeEnum.GENERIC_CODE_ERROR.getCodeString(), "Failed to read data for dashboard entry", false, false, false, MessageGeneralEnum.DATA_OPERATION_ERROR),
+    DASHBOARD_READ_GROUP_EMPTY(300, MessageCodeEnum.GENERIC_CODE_ERROR.getCodeString(), "Empty dashboard", false, false, false, MessageGeneralEnum.DATA_OPERATION_ERROR),
+    DASHBOARD_READ_DATA_EMPTY(300, MessageCodeEnum.GENERIC_CODE_ERROR.getCodeString(), "Empty data", false, false, false, MessageGeneralEnum.DATA_OPERATION_ERROR),
     // *********** GENERIC ***********
     GENERIC_OK(500, MessageCodeEnum.GENERIC_CODE_SUCCESS.getCodeString(), "Operation finished with success.", false, false, false, MessageGeneralEnum.GENERIC_SUCCESS),
     GENERIC_WARNING(500, MessageCodeEnum.GENERIC_CODE_WARNING.getCodeString(), "Operation finished with Warning :  %REASON%.", false, false, false, MessageGeneralEnum.GENERIC_WARNING),

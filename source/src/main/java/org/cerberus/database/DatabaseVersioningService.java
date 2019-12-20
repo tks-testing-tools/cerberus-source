@@ -8353,46 +8353,69 @@ public class DatabaseVersioningService implements IDatabaseVersioningService {
         // 1456
         a.add("UPDATE dashboardReportItem SET `isConfigurable`='Y' WHERE 1=1;");
 
-        a.add("DROP TABLE `dashboardEntry`;");
+        a.add("DROP TABLE `dashboardEntry`,`dashboardGroupEntriesCampaign`,`dashboardGroupEntriesApplication`,`dashboardGroupEntries`,`dashboardReportItem`,`dashboardTypeReportItem`;");
 
-        a.add("CREATE TABLE `dashboardEntry` ("
-                + "	`idGroupEntries` int(11) NOT NULL,"
-                + "	`reportItemCode` varchar(50) NOT NULL,"
-                + "	`param1` varchar(255) DEFAULT NULL,"
-                + "	`param2` varchar(255) DEFAULT NULL,"
-                + "	PRIMARY KEY (`idGroupEntries`,`reportItemCode`),"
-                + "	CONSTRAINT `FK_dashboardEntry_01` FOREIGN KEY (`idGroupEntries`) REFERENCES `dashboardGroupEntries` (`idGroupEntries`) ON DELETE CASCADE ON UPDATE CASCADE,"
-                + "	CONSTRAINT `FK_dashboardEntry_02` FOREIGN KEY (`reportItemCode`) REFERENCES `dashboardReportItem` (`reportItemCode`)"
+        a.add("CREATE TABLE `dashboardtypeindicator` ("
+                + "`code_type_indicator` varchar(50) NOT NULL ,"
+                + "`desc_type_indicator` varchar(255) NOT NULL,"
+                + "`UsrCreated` varchar(45) NOT NULL DEFAULT '',"
+                + "`DateCreated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                + "`UsrModif` varchar(45) NOT NULL DEFAULT '',"
+                + "`DateModif` timestamp NOT NULL DEFAULT '1970-01-01 01:01:01',"
+                + "PRIMARY KEY (`code_type_indicator`)"
                 + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
-        a.add("DROP TABLE `dashboardGroupEntriesCampaign`;");
+        a.add("INSERT INTO `dashboardtypeindicator` (`code_type_indicator`,`desc_type_indicator`)"
+                + "VALUES ('CAMPAIGN','Indicator associate to campaign'),"
+                + "('CAMPAIGN_GROUP','Indicator associate to campaign_groups'),"
+                + "('APPLICATION','Indicator associate to application'),"
+                + "('GENERIC','Indicator associate to instance of Cerberus'),"
+                + "('ENVIRONMENT','Indicator associate to environment');");
 
-        a.add("DROP TABLE `dashboardGroupEntriesApplication`;");
+        a.add("CREATE TABLE `dashboardindicator` ("
+                + "`code_indicator` varchar(50) NOT NULL ,"
+                + "`type_indicator` varchar(255) NOT NULL,"
+                + "`UsrCreated` varchar(45) NOT NULL DEFAULT '',"
+                + "`DateCreated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                + "`UsrModif` varchar(45) NOT NULL DEFAULT '',"
+                + "`DateModif` timestamp NOT NULL DEFAULT '1970-01-01 01:01:01',"
+                + "PRIMARY KEY (`code_indicator`),"
+                + "CONSTRAINT `FK_indicator_01` FOREIGN KEY (`type_indicator`) REFERENCES `dashboardtypeindicator` (`code_type_indicator`)"
+                + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
-        a.add("ALTER TABLE `dashboardGroupEntries` add `associateElement` VARCHAR(250) NULL;");
+        a.add("INSERT INTO `dashboardindicator` (`code_indicator`,`type_indicator`)"
+                + "VALUES ('CAMPAIGN_LAST_TAG_DETAIL','CAMPAIGN'),"
+                + "('CAMPAIGN_EVOLUTION','CAMPAIGN');");
 
-        a.add("ALTER TABLE `dashboardReportItem` DROP FOREIGN KEY `FK_typeReportItem_01`;");
+        a.add("CREATE TABLE `dashboardgroup` ("
+                + "	`id_group` int(11) NOT NULL AUTO_INCREMENT,"
+                + "	`sort` int(11) DEFAULT 10,"
+                + "	`usr_id` int(10) UNSIGNED NOT NULL,"
+                + "	`type` varchar(50) NOT NULL,"
+                + "	`associate_element` varchar(250) NOT NULL,"
+                + "     `UsrCreated` varchar(45) NOT NULL DEFAULT '',"
+                + "     `DateCreated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                + "     `UsrModif` varchar(45) NOT NULL DEFAULT '',"
+                + "     `DateModif` timestamp NOT NULL DEFAULT '1970-01-01 01:01:01',"
+                + "	PRIMARY KEY (`id_group`),"
+                + "	CONSTRAINT `FK_dashboardgroup_01` FOREIGN KEY (`usr_id`) REFERENCES `user` (`UserID`) ON DELETE CASCADE ON UPDATE CASCADE,"
+                + "	CONSTRAINT `FK_dashboardgroup_02` FOREIGN KEY (`type`) REFERENCES `dashboardtypeindicator` (`code_type_indicator`)"
+                + "	)ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;");
 
-        a.add("ALTER TABLE `dashboardGroupEntries` DROP FOREIGN KEY `FK_dashboardGroup_02`; ");
+        a.add("CREATE TABLE `dashboardentry` ("
+                + "	`id_group` int(11) NOT NULL,"
+                + "	`code_indicator` varchar(50) NOT NULL,"
+                + "	`param1` varchar(255) DEFAULT NULL,"
+                + "	`param2` varchar(255) DEFAULT NULL,"
+                + "     `UsrCreated` varchar(45) NOT NULL DEFAULT '',"
+                + "     `DateCreated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                + "     `UsrModif` varchar(45) NOT NULL DEFAULT '',"
+                + "     `DateModif` timestamp NOT NULL DEFAULT '1970-01-01 01:01:01',"
+                + "	PRIMARY KEY (`id_group`,`code_indicator`),"
+                + "	CONSTRAINT `FK_dashboardentry_01` FOREIGN KEY (`id_group`) REFERENCES `dashboardgroup` (`id_group`) ON DELETE CASCADE ON UPDATE CASCADE,"
+                + "	CONSTRAINT `FK_dashboardentry_02` FOREIGN KEY (`code_indicator`) REFERENCES `dashboardindicator` (`code_indicator`)"
+                + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
-        a.add("ALTER TABLE `dashboardGroupEntries` DROP `reportItemType`, DROP `codeGroupeEntries`;");
-
-        a.add("ALTER TABLE `dashboardReportItem` DROP `reportItemType`, DROP `isConfigurable`;");
-
-        a.add("ALTER TABLE `dashboardTypeReportItem` DROP `idTypeRepItem`;");
-
-        a.add("ALTER TABLE `dashboardTypeReportItem` add primary key(`codeTypeRepItem`);");
-
-        a.add("ALTER TABLE `dashboardReportItem` add `type` varchar(50);");
-
-        a.add("ALTER TABLE `dashboardGroupEntries` add `type` varchar (50);");
-
-        a.add("ALTER TABLE dashboardReportItem ADD CONSTRAINT `fk_dashboardGroupEntries_03` FOREIGN KEY (`type`) REFERENCES dashboardTypeReportItem(`codeTypeRepItem`);");
-
-        a.add("ALTER TABLE dashboardReportItem ADD CONSTRAINT `fk_dashboardreportitem_01` FOREIGN KEY (`type`) REFERENCES dashboardTypeReportItem(`codeTypeRepItem`);");
-        
-        a.add("UPDATE `dashboardReportItem` SET type='CAMPAIGN' WHERE `reportItemCode` = 'CAMPAIGN_EVOLUTION';");
-       
         return a;
     }
 

@@ -35,12 +35,13 @@ public class FactoryDashboardEntry implements IFactoryDashboardEntry {
     private static final Logger LOG = LogManager.getLogger(FactoryDashboardEntry.class);
 
     @Override
-    public DashboardEntry create(String codeReportItem, @Nullable Map<String, Object> entryData, String paramFirst, String paramSecond) {
+    public DashboardEntry create(@Nullable Integer idGroup, String codeIndicator, @Nullable Map<String, Object> entryData, String paramFirst, String paramSecond){
         DashboardEntry dashboardEntry = new DashboardEntry();
-        dashboardEntry.setCodeReportItem(codeReportItem);
+        dashboardEntry.setIdGroup(idGroup);
+        dashboardEntry.setCodeIndicator(codeIndicator);
         dashboardEntry.setEntryData(entryData);
-        dashboardEntry.setParamFirst(paramFirst);
-        dashboardEntry.setParamSecond(paramSecond);
+        dashboardEntry.setParam1Val(paramFirst);
+        dashboardEntry.setParam2Val(paramSecond);
         return dashboardEntry;
     }
 }

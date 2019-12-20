@@ -27,7 +27,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cerberus.crud.dao.IDashboardEntryDAO;
 import org.cerberus.crud.entity.DashboardEntry;
-import org.cerberus.crud.entity.DashboardGroupEntries;
+import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.factory.IFactoryDashboardEntry;
 import org.cerberus.database.DatabaseSpring;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,14 +49,14 @@ public class DashboardEntryDAO implements IDashboardEntryDAO {
     private IFactoryDashboardEntry factoryDashboardEntry;
 
     @Override
-    public List<DashboardEntry> readByGroupEntries(DashboardGroupEntries dashboardGroupEntries) {
+    public List<DashboardEntry> readByGroupEntries(DashboardGroup dashboardgroup) {
         List<DashboardEntry> response = new ArrayList();
         StringBuilder query = new StringBuilder();
-        query.append("SELECT`reportItemCode`,`param1`,`param2` FROM `dashboardEntry`WHERE `idGroupEntries` = ?;");
+        query.append("SELECT `id_group`,`code_indicator`,`param1`,`param2` FROM `dashboardentry` WHERE `id_group` = ?;");
         try {
             Connection connection = databaseSpring.connect();
             PreparedStatement preStat = connection.prepareStatement(query.toString());
-            preStat.setInt(1, dashboardGroupEntries.getId());
+            preStat.setInt(1, dashboardgroup.getId());
             ResultSet rs = preStat.executeQuery();
             while (rs.next()) {
                 response.add(this.loadFromResultSet(rs));
@@ -69,26 +69,23 @@ public class DashboardEntryDAO implements IDashboardEntryDAO {
 
     /**
      * Create a dashboard entry
-     *
-     * @param reportItemCode report item code string
-     * @param param1 first param of the dashboard
-     * @param param2 second param of the dashboard
+     * @param dashboardEntry
      * @return the new id group entries
      */
     @Override
-    public String create(int idGroupEntries, String reportItemCode, String param1, String param2) {
+    public String create(DashboardEntry dashboardEntry) {
         String result = new String();
-        final String query = "INSERT INTO dashboardEntry(idGroupEntries, reportItemCode, param1, param2) VALUES (?,?,?,?)";
+        final String query = "INSERT INTO dashboardentry(id_group, code_indicator, param1, param2) VALUES (?,?,?,?)";
 
         try {
             Connection connection = databaseSpring.connect();
             try {
                 PreparedStatement preStat = connection.prepareStatement(query);
 
-                preStat.setInt(1, idGroupEntries);
-                preStat.setString(2, reportItemCode);
-                preStat.setString(3, param1);
-                preStat.setString(4, param2);
+                preStat.setInt(1, dashboardEntry.getIdGroup());
+                preStat.setString(2, dashboardEntry.getCodeIndicator());
+                preStat.setString(3, dashboardEntry.getParam1Val());
+                preStat.setString(4, dashboardEntry.getParam2Val());
                 preStat.execute();
                 preStat.close();
                 result = "Insert entry successfully";
@@ -114,9 +111,10 @@ public class DashboardEntryDAO implements IDashboardEntryDAO {
 
     @Override
     public DashboardEntry loadFromResultSet(ResultSet rs) throws SQLException {
-        String reportItemCode = rs.getString("reportItemCode");
+        Integer idGroup = rs.getInt("id_group");
+        String reportItemCode = rs.getString("code_indicator");
         String param1 = rs.getString("param1");
         String param2 = rs.getString("param2");
-        return factoryDashboardEntry.create(reportItemCode, null, param1, param2);
+        return factoryDashboardEntry.create(idGroup, reportItemCode, null, param1, param2);
     }
 }

@@ -25,6 +25,7 @@ import org.cerberus.crud.dao.impl.dashboarditem.DashboardCampaignEvolutionDAO;
 import org.cerberus.crud.dao.impl.dashboarditem.DashboardCampaignLastReportByStatusDAO;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.service.IDashboardEntryDataService;
+import org.cerberus.enums.MessageEventEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,24 +45,34 @@ public class DashboardEntryDataService implements IDashboardEntryDataService {
     private static final Logger LOG = LogManager.getLogger(DashboardEntryService.class);
 
     public Map<String, Object> read(DashboardEntry dashboardEntry) {
-        LOG.debug("Read dashboard data for entry : ", dashboardEntry.getCodeReportItem());
-        Map<String, Object> response = new HashMap();
-
+        LOG.debug("Read dashboard data for entry : ", dashboardEntry.getCodeIndicator());
+        Map<String, Object> dashboardEntryData = new HashMap();
+        boolean dataFailed = false;
         try {
-            switch (dashboardEntry.getCodeReportItem()) {
+            switch (dashboardEntry.getCodeIndicator()) {
                 case "CAMPAIGN_EVOLUTION":
-                    response = dashboardCampaignEvolutionDAO.readDataForDashboardEntry(dashboardEntry);
+                    dashboardEntryData = dashboardCampaignEvolutionDAO.readDataForDashboardEntry(dashboardEntry);
                     break;
-                case "CAMPAIGN_LAST_REPORT":
-                    response = dashboardCampainLastReportByStatusDAO.readDataForDashboardEntry(dashboardEntry);
+                case "CAMPAIGN_LAST_REPORT_DETAIL":
+                    dashboardEntryData = dashboardCampainLastReportByStatusDAO.readDataForDashboardEntry(dashboardEntry);
                     break;
                 default:
-                    response.put("Unknown report item type", "Error");
+                    dashboardEntryData.put("Unknown report item type", "Error");
+                    dashboardEntryData.put("MessageEvent", MessageEventEnum.DASHBOARD_READ_DATA_FAILED);
+                    dataFailed = true;
             }
         } catch (Exception e) {
             LOG.error("Catch exception during read data for dashboard : ", e);
         }
-        return response;
+        if (!dataFailed) {
+            if (dashboardEntryData.size() == 0) {
+                dashboardEntryData.put("MessageEvent", MessageEventEnum.DASHBOARD_READ_DATA_EMPTY);
+            } else {
+                dashboardEntryData.put("MessageEvent", MessageEventEnum.DASHBOARD_READ_DATA_SUCCESS);
+            }
+        }
+
+        return dashboardEntryData;
     }
-    
+
 }

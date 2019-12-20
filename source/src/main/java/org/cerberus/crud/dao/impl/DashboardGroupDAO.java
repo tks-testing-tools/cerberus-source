@@ -24,13 +24,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cerberus.crud.dao.IDashboardGroupEntriesDAO;
-import org.cerberus.crud.entity.DashboardGroupEntries;
+import org.cerberus.crud.dao.IDashboardGroupDAO;
+import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.entity.User;
-import org.cerberus.crud.factory.IFactoryDashboardGroupEntries;
+import org.cerberus.crud.factory.IFactoryDashboardGroup;
 import org.cerberus.database.DatabaseSpring;
 import org.cerberus.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,24 +40,24 @@ import org.springframework.stereotype.Repository;
  * @author cDelage
  */
 @Repository
-public class DashboardGroupEntriesDAO implements IDashboardGroupEntriesDAO {
+public class DashboardGroupDAO implements IDashboardGroupDAO {
 
-    private static final Logger LOG = LogManager.getLogger(DashboardGroupEntriesDAO.class);
+    private static final Logger LOG = LogManager.getLogger(DashboardGroupDAO.class);
 
     @Autowired
     private DatabaseSpring databaseSpring;
 
     @Autowired
-    private IFactoryDashboardGroupEntries factoryDashboardGroupEntries;
+    private IFactoryDashboardGroup factoryDashboardGroupEntries;
 
     @Override
-    public List<DashboardGroupEntries> readByUser(User user) {
-        LOG.debug("DASHBOARD GROUP ENTRIES readByUser DAO");
-        List<DashboardGroupEntries> response = new ArrayList();
+    public List<DashboardGroup> readByUser(User user) {
+        LOG.debug("DASHBOARD GROUP readByUser DAO");
+        List<DashboardGroup> response = new ArrayList();
         StringBuilder query = new StringBuilder();
-        query.append("SELECT `idGroupEntries`,`sort`,`dashboardUserId`,`associateElement`, `type` "
-                + "FROM `dashboardGroupEntries`"
-                + "WHERE `dashboardUserId`= ? ;");
+        query.append("SELECT `id_group`,`sort`,`usr_id`,`associate_element`, `type` "
+                + "FROM `dashboardgroup`"
+                + "WHERE `usr_id`= ? ;");
 
         try {
             Connection connection = this.databaseSpring.connect();
@@ -77,18 +76,18 @@ public class DashboardGroupEntriesDAO implements IDashboardGroupEntriesDAO {
     }
 
     @Override
-    public DashboardGroupEntries loadFromResultSet(ResultSet rs, User user) throws SQLException {
-        Integer id = rs.getInt("idGroupEntries");
+    public DashboardGroup loadFromResultSet(ResultSet rs, User user) throws SQLException {
+        Integer id = rs.getInt("id_group");
         Integer sort = rs.getInt("sort");
         String type = rs.getString("type");
-        String associateElement = rs.getString("associateElement");
+        String associateElement = rs.getString("associate_element");
         return factoryDashboardGroupEntries.create(id, user, null, sort.toString(), associateElement, type);
     }
 
     @Override
-    public Integer create(int sort, int dashboardUserId, String type,@Nullable String associateElement) {
+    public Integer create(DashboardGroup dashboardGroup) {
         Integer result = 0;
-        final String query = "INSERT INTO `dashboardGroupEntries`(`sort`, `dashboardUserId`, `type`,`associateElement`) VALUES (?,?,?,?)";
+        final String query = "INSERT INTO `dashbordgroup`(`sort`, `usr_id`, `type`,`associate_element`) VALUES (?,?,?,?)";
 
         try {
             Connection connection = databaseSpring.connect();
@@ -96,12 +95,12 @@ public class DashboardGroupEntriesDAO implements IDashboardGroupEntriesDAO {
                 PreparedStatement preStat = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
                 try {
 
-                    preStat.setInt(1, sort);
-                    preStat.setInt(2, dashboardUserId);
-                    preStat.setString(3, type);
-                    if (!StringUtil.isNullOrEmpty(associateElement)) {
-                        preStat.setString(4, associateElement);
-                    }else{
+                    preStat.setString(1, dashboardGroup.getSort());
+                    preStat.setInt(2, dashboardGroup.getUser().getUserID());
+                    preStat.setString(3, dashboardGroup.getType());
+                    if (!StringUtil.isNullOrEmpty(dashboardGroup.getAssociateElement())) {
+                        preStat.setString(4, dashboardGroup.getAssociateElement());
+                    } else {
                         preStat.setString(4, "");
                     }
                     preStat.execute();
@@ -143,7 +142,7 @@ public class DashboardGroupEntriesDAO implements IDashboardGroupEntriesDAO {
                 try {
                     preStat.setInt(1, user.getUserID());
                     preStat.execute();
-                    response = "CLEAN DASHBOARD SUCESSFULLY";
+                    response = "CLEAN SUCESSFULLY";
                 } catch (SQLException exception) {
                     LOG.error("Unable to execute query : " + exception.toString());
                     response = "FAIL TO CLEAN DASHBOARD CAUSE " + exception.getLocalizedMessage();

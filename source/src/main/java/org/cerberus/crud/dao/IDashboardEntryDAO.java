@@ -21,7 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import org.cerberus.crud.entity.DashboardEntry;
-import org.cerberus.crud.entity.DashboardGroupEntries;
+import org.cerberus.crud.entity.DashboardGroup;
 
 /**
  *
@@ -29,9 +29,9 @@ import org.cerberus.crud.entity.DashboardGroupEntries;
  */
 public interface IDashboardEntryDAO {
 
-    public List<DashboardEntry> readByGroupEntries(DashboardGroupEntries dashboardGroupEntries);
+    public List<DashboardEntry> readByGroupEntries(DashboardGroup dashboardGroupEntries);
 
-    public String create(int pIdGroupEntries, String pReportItemCode, String pParamId1, String pParamId2);
+    public String create(DashboardEntry dashboardEntry);
 
     public DashboardEntry loadFromResultSet(ResultSet rs) throws SQLException;
 

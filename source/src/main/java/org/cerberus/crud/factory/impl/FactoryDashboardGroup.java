@@ -20,9 +20,9 @@ package org.cerberus.crud.factory.impl;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.cerberus.crud.entity.DashboardEntry;
-import org.cerberus.crud.entity.DashboardGroupEntries;
+import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.entity.User;
-import org.cerberus.crud.factory.IFactoryDashboardGroupEntries;
+import org.cerberus.crud.factory.IFactoryDashboardGroup;
 import org.springframework.stereotype.Service;
 
 /**
@@ -30,11 +30,11 @@ import org.springframework.stereotype.Service;
  * @author utilisateur
  */
 @Service
-public class FactoryDashboardGroupEntries implements IFactoryDashboardGroupEntries {
+public class FactoryDashboardGroup implements IFactoryDashboardGroup {
     
     @Override
-    public DashboardGroupEntries create(@Nullable Integer id, @Nullable User user, @Nullable List<DashboardEntry> dashboardEntries, String sort, @Nullable String associateElement, @Nullable String type) {
-        DashboardGroupEntries dashboardGroupEntries = new DashboardGroupEntries();
+    public DashboardGroup create(@Nullable Integer id, @Nullable User user, @Nullable List<DashboardEntry> dashboardEntries, String sort, @Nullable String associateElement, @Nullable String type) {
+        DashboardGroup dashboardGroupEntries = new DashboardGroup();
         dashboardGroupEntries.setId(id);
         dashboardGroupEntries.setUser(user);
         dashboardGroupEntries.setDashboardEntries(dashboardEntries);
