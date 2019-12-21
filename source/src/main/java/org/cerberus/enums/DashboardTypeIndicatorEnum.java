@@ -44,11 +44,11 @@ public enum DashboardTypeIndicatorEnum {
 
     public static List<DashboardTypeIndicatorDTO> getDashboardPossibility() {
         List<DashboardTypeIndicatorDTO> response = new ArrayList();
-            for (DashboardTypeIndicatorEnum it : values()) {
-                if (!it.getTypeIndicator().equals("INVALID_TYPE_REPORT_ITEM")) {
-                    response.add(new DashboardTypeIndicatorDTO(it.getTypeIndicator(), DashboardIndicatorEnum.getIndicatorByType(it.getDescTypeIndicator())));
-                }
+        for (DashboardTypeIndicatorEnum it : values()) {
+            if (!it.getTypeIndicator().equals("INVALID_TYPE_REPORT_ITEM")) {
+                response.add(new DashboardTypeIndicatorDTO(it.getTypeIndicator(), DashboardIndicatorEnum.getIndicatorByType(it.getTypeIndicator())));
             }
+        }
         return response;
     }
 

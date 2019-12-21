@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cerberus.crud.service.impl.DashboardGroupService;
 import org.cerberus.dto.DashboardIndicatorDTO;
 
 /**
@@ -41,8 +42,6 @@ public enum DashboardIndicatorEnum {
     private String param2Type;
     private DashboardTypeIndicatorEnum type;
 
-    private static final Logger LOG = LogManager.getLogger(DashboardIndicatorEnum.class);
-
     private DashboardIndicatorEnum(String codeIndicator, String titleIndicator, String param1Title, String param1Type, String param2Title, String param2Type, DashboardTypeIndicatorEnum type) {
         this.codeIndicator = codeIndicator;
         this.titleIndicator = titleIndicator;
@@ -55,18 +54,11 @@ public enum DashboardIndicatorEnum {
 
     public static List<DashboardIndicatorDTO> getIndicatorByType(String type) {
         List<DashboardIndicatorDTO> response = new ArrayList();
-        LOG.debug("get indicators for type : ", type);
-        try {
             for (DashboardIndicatorEnum it : values()) {
-                LOG.debug(it.getCodeIndicator());
                 if (it.getType().getTypeIndicator().equals(type)) {
-                    LOG.debug("ADD TO LIST");
                     response.add(new DashboardIndicatorDTO(it.getCodeIndicator(), it.getParam1Title(), it.getParam1Type(), it.getParam2Title(), it.getParam2Type()));
                 }
             }
-        }catch(Exception exception){
-            LOG.error("Catch exception during read type : ", exception);
-        }
         return response;
     }
 
