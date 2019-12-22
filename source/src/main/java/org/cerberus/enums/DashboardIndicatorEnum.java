@@ -32,7 +32,9 @@ public enum DashboardIndicatorEnum {
 
     NOT_VALID("NOT_VALID", "Not valid report item", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.NOT_VALID),
     CAMPAIGN_EVOLUTION("CAMPAIGN_EVOLUTION", "campaign evolution", "Start date", "DATE", "End date", "DATE", DashboardTypeIndicatorEnum.CAMPAIGN),
-    CAMPAIGN_LAST_REPORT("CAMPAIGN_LAST_REPORT_DETAIL", "Last report detail campaign", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.CAMPAIGN);
+    CAMPAIGN_LAST_REPORT("CAMPAIGN_LAST_REPORT_DETAIL", "Last report detail campaign", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.CAMPAIGN),
+    STATUS_BY_ENVIRONMENT("STATUS_BY_ENVIRONMENT", "Last status by environment", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.APPLICATION),
+    TESTCASE_EVOLUTION("TESTCASE_EVOLUTION", "evolution test cases", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.APPLICATION);
 
     private String codeIndicator;
     private String titleIndicator;
@@ -54,12 +56,32 @@ public enum DashboardIndicatorEnum {
 
     public static List<DashboardIndicatorDTO> getIndicatorByType(String type) {
         List<DashboardIndicatorDTO> response = new ArrayList();
-            for (DashboardIndicatorEnum it : values()) {
-                if (it.getType().getTypeIndicator().equals(type)) {
-                    response.add(new DashboardIndicatorDTO(it.getCodeIndicator(), it.getParam1Title(), it.getParam1Type(), it.getParam2Title(), it.getParam2Type()));
+        for (DashboardIndicatorEnum it : values()) {
+            if (it.getType().getTypeIndicator().equals(type)) {
+                response.add(new DashboardIndicatorDTO(it.getCodeIndicator(), it.getParam1Title(), it.getParam1Type(), it.getParam2Title(), it.getParam2Type()));
+            }
+        }
+        return response;
+    }
+
+    public static String getTypeByIndicator(String indicator) {
+        for (DashboardIndicatorEnum it : values()) {
+            if (it.getCodeIndicator().equals(indicator)) {
+                return it.getType().getTypeIndicator();
+            }
+        }
+        return NOT_VALID.getType().getTypeIndicator();
+    }
+
+    public static boolean verifyCode(String codeIndicator) {
+        for (DashboardIndicatorEnum it : values()) {
+            if (it.getCodeIndicator().equals(codeIndicator)) {
+                if (it.getCodeIndicator() != "NOT_VALID") {
+                    return true;
                 }
             }
-        return response;
+        }
+        return false;
     }
 
     public String getCodeIndicator() {

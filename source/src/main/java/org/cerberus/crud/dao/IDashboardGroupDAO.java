@@ -23,6 +23,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.entity.User;
+import org.cerberus.engine.entity.MessageEvent;
 
 /**
  *
@@ -36,6 +37,6 @@ public interface IDashboardGroupDAO {
 
     public Integer create(DashboardGroup dashboardGroup);
 
-    public String cleanByUser(User user);
+    public MessageEvent cleanByUser(User user);
 
 }

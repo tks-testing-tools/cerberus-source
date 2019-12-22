@@ -28,12 +28,12 @@ import org.cerberus.crud.entity.DashboardEntry;
 public class DashboardGroupDTO {
 
     private Integer id;
-    private String sort;
+    private Integer sort;
     private String associateElement;
     private String type;
     private List<DashboardEntry> dashboardEntries;
 
-    public DashboardGroupDTO(@Nullable Integer id, List<DashboardEntry> dashboardEntries, String sort, @Nullable String associateElement, String type) {
+    public DashboardGroupDTO(@Nullable Integer id, List<DashboardEntry> dashboardEntries, Integer sort, @Nullable String associateElement, String type) {
         this.id = id;
         this.dashboardEntries = dashboardEntries;
         this.sort = sort;
@@ -57,11 +57,11 @@ public class DashboardGroupDTO {
         this.dashboardEntries = dashboardEntries;
     }
 
-    public String getSort() {
+    public Integer getSort() {
         return sort;
     }
 
-    public void setSort(String sort) {
+    public void setSort(Integer sort) {
         this.sort = sort;
     }
 

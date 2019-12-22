@@ -32,5 +32,5 @@ import org.cerberus.crud.entity.User;
 
 public interface IFactoryDashboardGroup {
     
-    public DashboardGroup create(@Nullable Integer id, User user, @Nullable List<DashboardEntry> dashboardEntries, String sort, String associateElement, @Nullable String type);
+    public DashboardGroup create(@Nullable Integer id, User user, @Nullable List<DashboardEntry> dashboardEntries, Integer sort, String associateElement, @Nullable String type);
 }

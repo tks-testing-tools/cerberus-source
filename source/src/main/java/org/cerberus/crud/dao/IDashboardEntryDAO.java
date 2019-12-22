@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.List;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroup;
+import org.cerberus.engine.entity.MessageEvent;
 
 /**
  *
@@ -31,7 +32,7 @@ public interface IDashboardEntryDAO {
 
     public List<DashboardEntry> readByGroupEntries(DashboardGroup dashboardGroupEntries);
 
-    public String create(DashboardEntry dashboardEntry);
+    public MessageEvent create(DashboardEntry dashboardEntry);
 
     public DashboardEntry loadFromResultSet(ResultSet rs) throws SQLException;
 

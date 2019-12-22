@@ -21,6 +21,7 @@ import java.util.List;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.dto.DashboardGroupDTO;
+import org.cerberus.engine.entity.MessageEvent;
 
 /**
  *
@@ -32,6 +33,6 @@ public interface IDashboardEntryService {
 
     public List<DashboardEntry> readByGroupEntriesWithData(DashboardGroup dashboardGroupEntries);
 
-    public String create(DashboardEntry dashboardEntry);
+    public MessageEvent create(DashboardEntry dashboardEntry);
     
 }

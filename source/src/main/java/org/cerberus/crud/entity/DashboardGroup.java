@@ -28,7 +28,7 @@ public class DashboardGroup {
     private Integer id;
     private User user;
     private List<DashboardEntry> dashboardEntries;
-    private String sort;
+    private Integer sort;
     private String type;
     private String associateElement;
 
@@ -56,11 +56,11 @@ public class DashboardGroup {
         this.dashboardEntries = dashboardEntries;
     }
 
-    public String getSort() {
+    public Integer getSort() {
         return sort;
     }
 
-    public void setSort(String sort) {
+    public void setSort(Integer sort) {
         this.sort = sort;
     }
 

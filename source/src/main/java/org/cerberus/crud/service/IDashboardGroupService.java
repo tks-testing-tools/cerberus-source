@@ -24,6 +24,7 @@ import org.cerberus.crud.entity.User;
 import org.cerberus.dto.DashboardGroupDTO;
 import org.cerberus.dto.DashboardTypeIndicatorDTO;
 import org.cerberus.engine.entity.MessageEvent;
+import org.cerberus.enums.MessageEventEnum;
 
 /**
  *
@@ -39,7 +40,11 @@ public interface IDashboardGroupService {
 
     public Integer create(DashboardGroup dashboardGroup);
 
-    public Map<String, Object> cleanByUser(User user);
+    public MessageEvent cleanByUser(User user);
 
     public List<DashboardTypeIndicatorDTO> readDashboardPossibility();
+    
+    public List<MessageEvent> updateDashboard(List<DashboardGroupDTO> dashboardGroup, User user);
+    
+    public MessageEvent checkDashboardIntegrity(List<DashboardGroupDTO> listGroup);
 }

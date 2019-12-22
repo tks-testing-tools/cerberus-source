@@ -31,6 +31,8 @@ import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.entity.User;
 import org.cerberus.crud.factory.IFactoryDashboardGroup;
 import org.cerberus.database.DatabaseSpring;
+import org.cerberus.engine.entity.MessageEvent;
+import org.cerberus.enums.MessageEventEnum;
 import org.cerberus.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -81,13 +83,13 @@ public class DashboardGroupDAO implements IDashboardGroupDAO {
         Integer sort = rs.getInt("sort");
         String type = rs.getString("type");
         String associateElement = rs.getString("associate_element");
-        return factoryDashboardGroupEntries.create(id, user, null, sort.toString(), associateElement, type);
+        return factoryDashboardGroupEntries.create(id, user, null, sort, associateElement, type);
     }
 
     @Override
     public Integer create(DashboardGroup dashboardGroup) {
         Integer result = 0;
-        final String query = "INSERT INTO `dashbordgroup`(`sort`, `usr_id`, `type`,`associate_element`) VALUES (?,?,?,?)";
+        final String query = "INSERT INTO `dashboardgroup`(`sort`, `usr_id`, `type`,`associate_element`) VALUES (?,?,?,?)";
 
         try {
             Connection connection = databaseSpring.connect();
@@ -95,7 +97,7 @@ public class DashboardGroupDAO implements IDashboardGroupDAO {
                 PreparedStatement preStat = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
                 try {
 
-                    preStat.setString(1, dashboardGroup.getSort());
+                    preStat.setInt(1, dashboardGroup.getSort());
                     preStat.setInt(2, dashboardGroup.getUser().getUserID());
                     preStat.setString(3, dashboardGroup.getType());
                     if (!StringUtil.isNullOrEmpty(dashboardGroup.getAssociateElement())) {
@@ -132,9 +134,9 @@ public class DashboardGroupDAO implements IDashboardGroupDAO {
     }
 
     @Override
-    public String cleanByUser(User user) {
-        final String query = "DELETE FROM dashboardGroupEntries WHERE dashboardUserId = ?";
-        String response = new String();
+    public MessageEvent cleanByUser(User user) {
+        final String query = "DELETE FROM dashboardgroup WHERE usr_id = ?";
+        MessageEvent response = new MessageEvent(MessageEventEnum.DASHBOARD_DELETE_SUCCESS);
         try {
             Connection connection = databaseSpring.connect();
             try {
@@ -142,10 +144,11 @@ public class DashboardGroupDAO implements IDashboardGroupDAO {
                 try {
                     preStat.setInt(1, user.getUserID());
                     preStat.execute();
-                    response = "CLEAN SUCESSFULLY";
+                    
                 } catch (SQLException exception) {
                     LOG.error("Unable to execute query : " + exception.toString());
-                    response = "FAIL TO CLEAN DASHBOARD CAUSE " + exception.getLocalizedMessage();
+                    response = new MessageEvent(MessageEventEnum.DASHBOARD_DELETE_GROUP_FAILED);
+                    response.setDescription(response.getDescription().replace("%CAUSE%", exception.getLocalizedMessage()));
                 } finally {
                     preStat.close();
                 }

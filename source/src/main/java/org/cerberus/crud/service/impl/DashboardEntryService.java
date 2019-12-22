@@ -26,6 +26,7 @@ import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.service.IDashboardEntryDataService;
 import org.cerberus.crud.service.IDashboardEntryService;
+import org.cerberus.engine.entity.MessageEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -65,7 +66,7 @@ public class DashboardEntryService implements IDashboardEntryService {
      * @return message
      */
     @Override
-    public String create(DashboardEntry dashboardEntry) {
+    public MessageEvent create(DashboardEntry dashboardEntry) {
         return dashboardEntryDAO.create(dashboardEntry);
     }
     

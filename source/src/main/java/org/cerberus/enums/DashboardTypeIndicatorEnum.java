@@ -52,6 +52,17 @@ public enum DashboardTypeIndicatorEnum {
         return response;
     }
 
+    public static boolean verifyType(String type) {
+        for (DashboardTypeIndicatorEnum it : values()) {
+            if (type.equals(it.getTypeIndicator())) {
+                if (!type.equals("NOT_VALID")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public String getTypeIndicator() {
         return typeIndicator;
     }

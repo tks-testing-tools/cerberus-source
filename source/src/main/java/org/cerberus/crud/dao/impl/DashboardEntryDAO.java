@@ -30,6 +30,8 @@ import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.factory.IFactoryDashboardEntry;
 import org.cerberus.database.DatabaseSpring;
+import org.cerberus.engine.entity.MessageEvent;
+import org.cerberus.enums.MessageEventEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -69,12 +71,16 @@ public class DashboardEntryDAO implements IDashboardEntryDAO {
 
     /**
      * Create a dashboard entry
+     *
      * @param dashboardEntry
      * @return the new id group entries
      */
     @Override
-    public String create(DashboardEntry dashboardEntry) {
-        String result = new String();
+    public MessageEvent create(DashboardEntry dashboardEntry) {
+        MessageEvent response = new MessageEvent(MessageEventEnum.DASHBOARD_CREATE_ENTRY_SUCCESS);
+        response.setDescription(response.getDescription().replace("%GROUP%", dashboardEntry.getIdGroup().toString()));
+        response.setDescription(response.getDescription().replace("%INDICATOR%", dashboardEntry.getCodeIndicator()));
+
         final String query = "INSERT INTO dashboardentry(id_group, code_indicator, param1, param2) VALUES (?,?,?,?)";
 
         try {
@@ -88,10 +94,9 @@ public class DashboardEntryDAO implements IDashboardEntryDAO {
                 preStat.setString(4, dashboardEntry.getParam2Val());
                 preStat.execute();
                 preStat.close();
-                result = "Insert entry successfully";
             } catch (SQLException exception) {
                 LOG.error("Unable to execute query : " + exception.toString());
-                result = "Insert entry failed";
+                response = new MessageEvent(MessageEventEnum.DASHBOARD_CREATE_ENTRY_FAILED);
             } finally {
                 try {
 
@@ -106,7 +111,7 @@ public class DashboardEntryDAO implements IDashboardEntryDAO {
             LOG.error("Failed to connect to database, catched Exception : ", exception);
         }
 
-        return result;
+        return response;
     }
 
     @Override
