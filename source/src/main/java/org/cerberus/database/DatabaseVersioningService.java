@@ -8384,7 +8384,7 @@ public class DatabaseVersioningService implements IDatabaseVersioningService {
                 + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
         a.add("INSERT INTO `dashboardindicator` (`code_indicator`,`type_indicator`)"
-                + "VALUES ('CAMPAIGN_LAST_TAG_DETAIL','CAMPAIGN'),"
+                + "VALUES ('CAMPAIGN_LAST_EXE_DETAIL','CAMPAIGN'),"
                 + "('CAMPAIGN_EVOLUTION','CAMPAIGN');");
 
         a.add("CREATE TABLE `dashboardgroup` ("

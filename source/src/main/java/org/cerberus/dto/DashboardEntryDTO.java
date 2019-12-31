@@ -15,39 +15,34 @@
 
  You should have received a copy of the GNU General Public License
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
-package org.cerberus.crud.entity;
+package org.cerberus.dto;
 
 import java.io.Serializable;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  *
  * @author utilisateur
  */
-public class DashboardEntry{
+public class DashboardEntryDTO implements Serializable {
 
+    private static final long serialVersionUID = 1350092881346723536L;
 
-    private Integer idGroup;
-    private String codeIndicator;
+    private String titleIndicator;
     private Map<String, Object> entryData;
-    private String param1Val;
-    private String param2Val;
-    private String associateElement;
 
-    public Integer getIdGroup() {
-        return idGroup;
+    public DashboardEntryDTO(String titleIndicator, Map<String, Object> entryData) {
+        this.titleIndicator = titleIndicator;
+        this.entryData = entryData;
     }
 
-    public void setIdGroup(Integer idGroup) {
-        this.idGroup = idGroup;
+    public String getTitleIndicator() {
+        return titleIndicator;
     }
 
-    public String getCodeIndicator() {
-        return codeIndicator;
-    }
-
-    public void setCodeIndicator(String codeIndicator) {
-        this.codeIndicator = codeIndicator;
+    public void setTitleIndicator(String titleIndicator) {
+        this.titleIndicator = titleIndicator;
     }
 
     public Map<String, Object> getEntryData() {
@@ -56,29 +51,5 @@ public class DashboardEntry{
 
     public void setEntryData(Map<String, Object> entryData) {
         this.entryData = entryData;
-    }
-
-    public String getParam1Val() {
-        return param1Val;
-    }
-
-    public void setParam1Val(String param1Val) {
-        this.param1Val = param1Val;
-    }
-
-    public String getParam2Val() {
-        return param2Val;
-    }
-
-    public void setParam2Val(String param2Val) {
-        this.param2Val = param2Val;
-    }
-
-    public String getAssociateElement() {
-        return associateElement;
-    }
-
-    public void setAssociateElement(String associateElement) {
-        this.associateElement = associateElement;
     }
 }

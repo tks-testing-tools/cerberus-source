@@ -17,7 +17,6 @@
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
 package org.cerberus.crud.dao;
 
-import java.sql.ResultSet;
 import java.util.Map;
 import org.cerberus.crud.entity.DashboardEntry;
 
@@ -29,5 +28,4 @@ public interface IDashboardEntryDataDAO {
 
     public Map<String, Object> readDataForDashboardEntry(DashboardEntry dashboardEntry);
     
-    public Map<String, Object> loadFromResultSet(ResultSet rs);
 }

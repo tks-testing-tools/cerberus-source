@@ -20,7 +20,10 @@ package org.cerberus.crud.service;
 import java.util.List;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroup;
+import org.cerberus.dto.DashboardEntryDTO;
 import org.cerberus.dto.DashboardGroupDTO;
+import org.cerberus.dto.DashboardIndicatorConfigDTO;
+import org.cerberus.dto.MessageEventSlimDTO;
 import org.cerberus.engine.entity.MessageEvent;
 
 /**
@@ -33,6 +36,8 @@ public interface IDashboardEntryService {
 
     public List<DashboardEntry> readByGroupEntriesWithData(DashboardGroup dashboardGroupEntries);
 
-    public MessageEvent create(DashboardEntry dashboardEntry);
+    public MessageEventSlimDTO create(DashboardEntry dashboardEntry);
+
+    public List<DashboardEntryDTO> convertEntryListToDTO(List<DashboardEntry> dashboardEntry);
     
 }

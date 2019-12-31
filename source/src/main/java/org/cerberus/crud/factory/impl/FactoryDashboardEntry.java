@@ -17,7 +17,6 @@
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
 package org.cerberus.crud.factory.impl;
 
-import java.util.Map;
 import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,17 +34,15 @@ public class FactoryDashboardEntry implements IFactoryDashboardEntry {
     private static final Logger LOG = LogManager.getLogger(FactoryDashboardEntry.class);
 
     @Override
-    public DashboardEntry create(@Nullable Integer idGroup, String codeIndicator, @Nullable Map<String, Object> entryData, String paramFirst, String paramSecond) {
+    public DashboardEntry create(@Nullable Integer idGroup, String codeIndicator, String paramFirst, String paramSecond, String associateElement) {
         DashboardEntry dashboardEntry = new DashboardEntry();
         if (idGroup != null) {
             dashboardEntry.setIdGroup(idGroup);
         }
         dashboardEntry.setCodeIndicator(codeIndicator);
-        if (entryData != null) {
-            dashboardEntry.setEntryData(entryData);
-        }
         dashboardEntry.setParam1Val(paramFirst);
         dashboardEntry.setParam2Val(paramSecond);
+        dashboardEntry.setAssociateElement(associateElement);
         return dashboardEntry;
     }
 }

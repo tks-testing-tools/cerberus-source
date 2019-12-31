@@ -20,10 +20,9 @@ package org.cerberus.crud.dao;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import javax.annotation.Nullable;
 import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.entity.User;
-import org.cerberus.engine.entity.MessageEvent;
+import org.cerberus.dto.MessageEventSlimDTO;
 
 /**
  *
@@ -37,6 +36,6 @@ public interface IDashboardGroupDAO {
 
     public Integer create(DashboardGroup dashboardGroup);
 
-    public MessageEvent cleanByUser(User user);
+    public MessageEventSlimDTO cleanByUser(User user);
 
 }

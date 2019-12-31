@@ -31,6 +31,7 @@ import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.entity.User;
 import org.cerberus.crud.factory.IFactoryDashboardGroup;
 import org.cerberus.database.DatabaseSpring;
+import org.cerberus.dto.MessageEventSlimDTO;
 import org.cerberus.engine.entity.MessageEvent;
 import org.cerberus.enums.MessageEventEnum;
 import org.cerberus.util.StringUtil;
@@ -134,9 +135,9 @@ public class DashboardGroupDAO implements IDashboardGroupDAO {
     }
 
     @Override
-    public MessageEvent cleanByUser(User user) {
+    public MessageEventSlimDTO cleanByUser(User user) {
         final String query = "DELETE FROM dashboardgroup WHERE usr_id = ?";
-        MessageEvent response = new MessageEvent(MessageEventEnum.DASHBOARD_DELETE_SUCCESS);
+        MessageEventSlimDTO response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_DELETE_SUCCESS);
         try {
             Connection connection = databaseSpring.connect();
             try {
@@ -147,7 +148,7 @@ public class DashboardGroupDAO implements IDashboardGroupDAO {
                     
                 } catch (SQLException exception) {
                     LOG.error("Unable to execute query : " + exception.toString());
-                    response = new MessageEvent(MessageEventEnum.DASHBOARD_DELETE_GROUP_FAILED);
+                    response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_DELETE_GROUP_FAILED);
                     response.setDescription(response.getDescription().replace("%CAUSE%", exception.getLocalizedMessage()));
                 } finally {
                     preStat.close();

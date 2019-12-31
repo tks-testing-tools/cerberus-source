@@ -17,6 +17,7 @@
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
 package org.cerberus.dto;
 
+import java.io.Serializable;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.cerberus.crud.entity.DashboardEntry;
@@ -25,44 +26,24 @@ import org.cerberus.crud.entity.DashboardEntry;
  *
  * @author cDelage
  */
-public class DashboardGroupDTO {
+public class DashboardGroupDTO implements Serializable{
 
-    private Integer id;
-    private Integer sort;
+    private  static  final  long serialVersionUID =  1350092881346723535L;
+    
     private String associateElement;
-    private String type;
-    private List<DashboardEntry> dashboardEntries;
+    private List<DashboardEntryDTO> dashboardEntries;
 
-    public DashboardGroupDTO(@Nullable Integer id, List<DashboardEntry> dashboardEntries, Integer sort, @Nullable String associateElement, String type) {
-        this.id = id;
+    public DashboardGroupDTO(List<DashboardEntryDTO> dashboardEntries, String associateElement) {
         this.dashboardEntries = dashboardEntries;
-        this.sort = sort;
         this.associateElement = associateElement;
-        this.type = type;
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public List<DashboardEntry> getDashboardEntries() {
+    public List<DashboardEntryDTO> getDashboardEntries() {
         return dashboardEntries;
     }
 
-    public void setDashboardEntries(List<DashboardEntry> dashboardEntries) {
+    public void setDashboardEntries(List<DashboardEntryDTO> dashboardEntries) {
         this.dashboardEntries = dashboardEntries;
-    }
-
-    public Integer getSort() {
-        return sort;
-    }
-
-    public void setSort(Integer sort) {
-        this.sort = sort;
     }
 
     public String getAssociateElement() {
@@ -72,13 +53,4 @@ public class DashboardGroupDTO {
     public void setAssociateElement(String associateElement) {
         this.associateElement = associateElement;
     }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
 }

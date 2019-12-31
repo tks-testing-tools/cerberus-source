@@ -19,10 +19,7 @@ package org.cerberus.enums;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.cerberus.crud.service.impl.DashboardGroupService;
-import org.cerberus.dto.DashboardIndicatorDTO;
+import org.cerberus.dto.DashboardIndicatorConfigDTO;
 
 /**
  *
@@ -31,8 +28,8 @@ import org.cerberus.dto.DashboardIndicatorDTO;
 public enum DashboardIndicatorEnum {
 
     NOT_VALID("NOT_VALID", "Not valid report item", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.NOT_VALID),
-    CAMPAIGN_EVOLUTION("CAMPAIGN_EVOLUTION", "campaign evolution", "Start date", "DATE", "End date", "DATE", DashboardTypeIndicatorEnum.CAMPAIGN),
-    CAMPAIGN_LAST_REPORT("CAMPAIGN_LAST_REPORT_DETAIL", "Last report detail campaign", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.CAMPAIGN),
+    CAMPAIGN_EVOLUTION("CAMPAIGN_EVOLUTION", "Campaign evolution", "Start date", "DATE", "End date", "DATE", DashboardTypeIndicatorEnum.CAMPAIGN),
+    CAMPAIGN_LAST_REPORT("CAMPAIGN_LAST_EXE_DETAIL", "Last execution detail", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.CAMPAIGN),
     STATUS_BY_ENVIRONMENT("STATUS_BY_ENVIRONMENT", "Last status by environment", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.APPLICATION),
     TESTCASE_EVOLUTION("TESTCASE_EVOLUTION", "evolution test cases", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.APPLICATION);
 
@@ -54,11 +51,11 @@ public enum DashboardIndicatorEnum {
         this.type = type;
     }
 
-    public static List<DashboardIndicatorDTO> getIndicatorByType(String type) {
-        List<DashboardIndicatorDTO> response = new ArrayList();
+    public static List<DashboardIndicatorConfigDTO> getIndicatorByType(String type) {
+        List<DashboardIndicatorConfigDTO> response = new ArrayList();
         for (DashboardIndicatorEnum it : values()) {
             if (it.getType().getTypeIndicator().equals(type)) {
-                response.add(new DashboardIndicatorDTO(it.getCodeIndicator(), it.getParam1Title(), it.getParam1Type(), it.getParam2Title(), it.getParam2Type()));
+                response.add(new DashboardIndicatorConfigDTO(it.getCodeIndicator(), it.getTitleIndicator(), it.getParam1Title(), it.getParam1Type(), "DEFAULT", it.getParam2Title(), it.getParam2Type(), "DEFAULT", false, false, ""));
             }
         }
         return response;
@@ -82,6 +79,15 @@ public enum DashboardIndicatorEnum {
             }
         }
         return false;
+    }
+
+    public static String getTitleByCodeIndicator(String codeIndicator) {
+        for (DashboardIndicatorEnum it : values()) {
+            if(it.getCodeIndicator().equals(codeIndicator)){
+                return it.getTitleIndicator();
+            }
+        }
+        return NOT_VALID.getTitleIndicator();
     }
 
     public String getCodeIndicator() {

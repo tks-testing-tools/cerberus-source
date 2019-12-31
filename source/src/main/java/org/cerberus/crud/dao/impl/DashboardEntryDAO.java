@@ -30,6 +30,7 @@ import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.factory.IFactoryDashboardEntry;
 import org.cerberus.database.DatabaseSpring;
+import org.cerberus.dto.MessageEventSlimDTO;
 import org.cerberus.engine.entity.MessageEvent;
 import org.cerberus.enums.MessageEventEnum;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,8 +77,8 @@ public class DashboardEntryDAO implements IDashboardEntryDAO {
      * @return the new id group entries
      */
     @Override
-    public MessageEvent create(DashboardEntry dashboardEntry) {
-        MessageEvent response = new MessageEvent(MessageEventEnum.DASHBOARD_CREATE_ENTRY_SUCCESS);
+    public MessageEventSlimDTO create(DashboardEntry dashboardEntry) {
+        MessageEventSlimDTO response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_CREATE_ENTRY_SUCCESS);
         response.setDescription(response.getDescription().replace("%GROUP%", dashboardEntry.getIdGroup().toString()));
         response.setDescription(response.getDescription().replace("%INDICATOR%", dashboardEntry.getCodeIndicator()));
 
@@ -96,7 +97,7 @@ public class DashboardEntryDAO implements IDashboardEntryDAO {
                 preStat.close();
             } catch (SQLException exception) {
                 LOG.error("Unable to execute query : " + exception.toString());
-                response = new MessageEvent(MessageEventEnum.DASHBOARD_CREATE_ENTRY_FAILED);
+                response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_CREATE_ENTRY_FAILED);
             } finally {
                 try {
 
@@ -120,6 +121,6 @@ public class DashboardEntryDAO implements IDashboardEntryDAO {
         String reportItemCode = rs.getString("code_indicator");
         String param1 = rs.getString("param1");
         String param2 = rs.getString("param2");
-        return factoryDashboardEntry.create(idGroup, reportItemCode, null, param1, param2);
+        return factoryDashboardEntry.create(idGroup, reportItemCode, param1, param2, "");
     }
 }

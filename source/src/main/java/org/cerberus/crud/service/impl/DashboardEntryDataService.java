@@ -22,10 +22,12 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cerberus.crud.dao.impl.dashboarditem.DashboardCampaignEvolutionDAO;
-import org.cerberus.crud.dao.impl.dashboarditem.DashboardCampaignLastReportByStatusDAO;
+import org.cerberus.crud.dao.impl.dashboarditem.DashboardCampaignLastExeDAO;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.service.IDashboardEntryDataService;
+import org.cerberus.dto.MessageEventSlimDTO;
 import org.cerberus.enums.MessageEventEnum;
+import org.cerberus.util.DashboardUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,20 +42,24 @@ public class DashboardEntryDataService implements IDashboardEntryDataService {
     private DashboardCampaignEvolutionDAO dashboardCampaignEvolutionDAO;
 
     @Autowired
-    private DashboardCampaignLastReportByStatusDAO dashboardCampainLastReportByStatusDAO;
+    private DashboardCampaignLastExeDAO dashboardCampainLastReportByStatusDAO;
 
     private static final Logger LOG = LogManager.getLogger(DashboardEntryService.class);
 
     public Map<String, Object> read(DashboardEntry dashboardEntry) {
+
         LOG.debug("Read dashboard data for entry : ", dashboardEntry.getCodeIndicator());
         Map<String, Object> dashboardEntryData = new HashMap();
         boolean dataFailed = false;
+
         try {
             switch (dashboardEntry.getCodeIndicator()) {
                 case "CAMPAIGN_EVOLUTION":
                     dashboardEntryData = dashboardCampaignEvolutionDAO.readDataForDashboardEntry(dashboardEntry);
+                    dashboardEntryData = DashboardUtil.reduceMapForChart(dashboardEntryData, 10, false, false, false);
+                    dashboardEntryData = DashboardUtil.computeAdvancement(dashboardEntryData);
                     break;
-                case "CAMPAIGN_LAST_REPORT_DETAIL":
+                case "CAMPAIGN_LAST_EXE_DETAIL":
                     dashboardEntryData = dashboardCampainLastReportByStatusDAO.readDataForDashboardEntry(dashboardEntry);
                     break;
                 default:
@@ -66,9 +72,9 @@ public class DashboardEntryDataService implements IDashboardEntryDataService {
         }
         if (!dataFailed) {
             if (dashboardEntryData.size() == 0) {
-                dashboardEntryData.put("MessageEvent", MessageEventEnum.DASHBOARD_READ_DATA_EMPTY);
+                dashboardEntryData.put("MessageEvent", new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_READ_DATA_EMPTY));
             } else {
-                dashboardEntryData.put("MessageEvent", MessageEventEnum.DASHBOARD_READ_DATA_SUCCESS);
+                dashboardEntryData.put("MessageEvent", new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_READ_DATA_SUCCESS));
             }
         }
 

@@ -21,9 +21,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,7 +40,7 @@ import org.springframework.stereotype.Repository;
  * @author CorentinDelage
  */
 @Repository
-public class DashboardCampaignEvolutionDAO implements IDashboardEntryDataDAO {
+public class DashboardCampaignLastExeDAO implements IDashboardEntryDataDAO {
 
     @Autowired
     private DatabaseSpring databaseSpring;
@@ -46,58 +48,48 @@ public class DashboardCampaignEvolutionDAO implements IDashboardEntryDataDAO {
     private static final Logger LOG = LogManager.getLogger(DashboardCampaignLastExeDAO.class);
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
+    private SimpleDateFormat durationFormat = new SimpleDateFormat("HH:mm:ss");
 
-    private final int MAX_ROW_SELECTED = 10000;
-
-    /**
-     *
-     * @param dashboardEntry
-     * @return
-     */
+    @Override
     public Map<String, Object> readDataForDashboardEntry(DashboardEntry dashboardEntry) {
         Map<String, Object> response = new HashMap();
-        StringBuilder query = new StringBuilder();
-        boolean param1 = false;
-        boolean param2 = false;
-        query.append("SELECT `DateEndQueue`,`nbExe`  FROM tag WHERE `Campaign` = ? ");
-
-        //Construct request with param if necessary
-        //Param 1 : Start date
-        if (!dashboardEntry.getParam1Val().equals("DEFAULT")) {
-            query.append("AND `DateEndQueue` >= ? ");
-            param1 = true;
-        }
-        //Param 2 : End date
-        if (!dashboardEntry.getParam2Val().equals("DEFAULT")) {
-            query.append("AND `DateEndQueue` <= ? ");
-            param2 = true;
-        }
-
-        query.append("ORDER BY `DateEndQueue` ASC LIMIT ");
-        query.append(this.MAX_ROW_SELECTED);
-        query.append(";");
-
         try {
+            String queryTag = "SELECT `Tag`, `DateEndQueue`, `UsrCreated` FROM tag WHERE Campaign = ? ORDER BY id DESC LIMIT 1;";
+            String queryFirstExecutionForTag = "SELECT `Start`FROM testcaseexecution WHERE tag = ? LIMIT 1;";
+
             Connection connection = this.databaseSpring.connect();
-            PreparedStatement preStat = connection.prepareStatement(query.toString());
-            int i = 1;
-            preStat.setString(i++, dashboardEntry.getAssociateElement());
-            if (param1) {
-                preStat.setString(i++, dashboardEntry.getParam1Val());
-            }
-            if (param2) {
-                preStat.setString(i++, dashboardEntry.getParam2Val());
-            }
+
+            PreparedStatement preStat = connection.prepareStatement(queryTag);
+            preStat.setString(1, dashboardEntry.getAssociateElement());
             ResultSet rs = preStat.executeQuery();
-            while (rs.next()) {
-                //Index is use to format KEY_Index VALUE_X_Index for charts (format for dashboardUtil work)
-                Integer index = response.size() / 2;
-                response.put("KEY_" + index, dateFormat.format(new Date(rs.getTimestamp("DateEndQueue").getTime())));
-                response.put("VALUE_1_" + index, rs.getInt("nbExe"));
+
+            if (rs.first()) {
+                Timestamp end = rs.getTimestamp("DateEndQueue");
+                String tag = rs.getString("Tag");
+                
+                response.put("Tag", tag);
+                response.put("End", dateFormat.format(new Date(end.getTime())).toString());
+                response.put("Launch by", rs.getString("UsrCreated"));
+                
+                preStat = connection.prepareStatement(queryFirstExecutionForTag);
+                preStat.setString(1, tag);
+                ResultSet rsExe = preStat.executeQuery();
+                if (rsExe.first()) {
+                    Timestamp start = rsExe.getTimestamp("Start");
+                    response.put("Start", this.dateFormat.format(new Date(start.getTime())));
+                    if (end != null && start != null) {
+                            Long duration = end.getTime() - start.getTime();
+                            response.put("Duration", this.durationFormat.format(new Date(duration)));
+                    }
+                }
+
+            } else {
+                LOG.info("No tag found for campaign " + dashboardEntry.getAssociateElement());
+                response.put("Tag_Error", "No tag found for Campaign " + dashboardEntry.getAssociateElement());
             }
             connection.close();
         } catch (SQLException e) {
-            LOG.error("Error to read campaign evolution, catch exception : ", e);
+            LOG.error("ERROR during read last execution detail : ", e);
         }
         return response;
     }

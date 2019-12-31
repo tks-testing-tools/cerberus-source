@@ -512,6 +512,7 @@ public enum MessageEventEnum {
     DASHBOARD_READ_DATA_FAILED(400, MessageCodeEnum.GENERIC_CODE_ERROR.getCodeString(), "Failed to read data for dashboard entry", false, false, false, MessageGeneralEnum.DATA_OPERATION_ERROR),
     DASHBOARD_READ_GROUP_EMPTY(300, MessageCodeEnum.GENERIC_CODE_ERROR.getCodeString(), "Empty dashboard", false, false, false, MessageGeneralEnum.DATA_OPERATION_ERROR),
     DASHBOARD_READ_DATA_EMPTY(300, MessageCodeEnum.GENERIC_CODE_ERROR.getCodeString(), "Empty data", false, false, false, MessageGeneralEnum.DATA_OPERATION_ERROR),
+    DASHBOARD_CHECKER_EMPTY(300, MessageCodeEnum.GENERIC_CODE_ERROR.getCodeString(), "Dashboard sent is empty", false, false, false, MessageGeneralEnum.DATA_OPERATION_ERROR),
     // *********** GENERIC ***********
     GENERIC_OK(500, MessageCodeEnum.GENERIC_CODE_SUCCESS.getCodeString(), "Operation finished with success.", false, false, false, MessageGeneralEnum.GENERIC_SUCCESS),
     GENERIC_WARNING(500, MessageCodeEnum.GENERIC_CODE_WARNING.getCodeString(), "Operation finished with Warning :  %REASON%.", false, false, false, MessageGeneralEnum.GENERIC_WARNING),

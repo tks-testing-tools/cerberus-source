@@ -19,7 +19,8 @@ package org.cerberus.enums;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.cerberus.dto.DashboardTypeIndicatorDTO;
+import org.cerberus.dto.DashboardGroupConfigDTO;
+import org.cerberus.dto.DashboardTypeConfigDTO;
 
 /**
  *
@@ -36,17 +37,18 @@ public enum DashboardTypeIndicatorEnum {
 
     private String typeIndicator;
     private String descTypeIndicator;
-
+    
     private DashboardTypeIndicatorEnum(String typeIndicator, String descTypeIndicator) {
         this.typeIndicator = typeIndicator;
         this.descTypeIndicator = descTypeIndicator;
     }
 
-    public static List<DashboardTypeIndicatorDTO> getDashboardPossibility() {
-        List<DashboardTypeIndicatorDTO> response = new ArrayList();
+    public static List<DashboardTypeConfigDTO> getTypeList() {
+        List<DashboardTypeConfigDTO> response = new ArrayList();
+        List<DashboardGroupConfigDTO> emptyList = new ArrayList();
         for (DashboardTypeIndicatorEnum it : values()) {
             if (!it.getTypeIndicator().equals("INVALID_TYPE_REPORT_ITEM")) {
-                response.add(new DashboardTypeIndicatorDTO(it.getTypeIndicator(), DashboardIndicatorEnum.getIndicatorByType(it.getTypeIndicator())));
+                response.add(new DashboardTypeConfigDTO(it.getTypeIndicator(),emptyList));
             }
         }
         return response;
