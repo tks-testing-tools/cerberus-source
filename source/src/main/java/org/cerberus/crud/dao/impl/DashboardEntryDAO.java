@@ -31,7 +31,6 @@ import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.factory.IFactoryDashboardEntry;
 import org.cerberus.database.DatabaseSpring;
 import org.cerberus.dto.MessageEventSlimDTO;
-import org.cerberus.engine.entity.MessageEvent;
 import org.cerberus.enums.MessageEventEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -55,7 +54,7 @@ public class DashboardEntryDAO implements IDashboardEntryDAO {
     public List<DashboardEntry> readByGroupEntries(DashboardGroup dashboardgroup) {
         List<DashboardEntry> response = new ArrayList();
         StringBuilder query = new StringBuilder();
-        query.append("SELECT `id_group`,`code_indicator`,`param1`,`param2` FROM `dashboardentry` WHERE `id_group` = ?;");
+        query.append("SELECT `id_group`,`code_indicator`,`param1`,`param2`,`param3`,`param4` FROM `dashboardentry` WHERE `id_group` = ?;");
         try {
             Connection connection = databaseSpring.connect();
             PreparedStatement preStat = connection.prepareStatement(query.toString());
@@ -82,7 +81,7 @@ public class DashboardEntryDAO implements IDashboardEntryDAO {
         response.setDescription(response.getDescription().replace("%GROUP%", dashboardEntry.getIdGroup().toString()));
         response.setDescription(response.getDescription().replace("%INDICATOR%", dashboardEntry.getCodeIndicator()));
 
-        final String query = "INSERT INTO dashboardentry(id_group, code_indicator, param1, param2) VALUES (?,?,?,?)";
+        final String query = "INSERT INTO dashboardentry(`id_group`, `code_indicator`, `param1`, `param2`, `param3`,`param4`) VALUES (?,?,?,?,?,?)";
 
         try {
             Connection connection = databaseSpring.connect();
@@ -93,6 +92,8 @@ public class DashboardEntryDAO implements IDashboardEntryDAO {
                 preStat.setString(2, dashboardEntry.getCodeIndicator());
                 preStat.setString(3, dashboardEntry.getParam1Val());
                 preStat.setString(4, dashboardEntry.getParam2Val());
+                preStat.setString(5, dashboardEntry.getParam3Val());
+                preStat.setString(6, dashboardEntry.getParam4Val());
                 preStat.execute();
                 preStat.close();
             } catch (SQLException exception) {
@@ -121,6 +122,8 @@ public class DashboardEntryDAO implements IDashboardEntryDAO {
         String reportItemCode = rs.getString("code_indicator");
         String param1 = rs.getString("param1");
         String param2 = rs.getString("param2");
-        return factoryDashboardEntry.create(idGroup, reportItemCode, param1, param2, "");
+        String param3 = rs.getString("param3");
+        String param4 = rs.getString("param4");
+        return factoryDashboardEntry.create(idGroup, reportItemCode, param1, param2, param3, param4, "");
     }
 }

@@ -25,8 +25,8 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cerberus.crud.dao.IDashboardEntryDataDAO;
@@ -79,7 +79,8 @@ public class DashboardCampaignLastExeDAO implements IDashboardEntryDataDAO {
                     response.put("Start", this.dateFormat.format(new Date(start.getTime())));
                     if (end != null && start != null) {
                             Long duration = end.getTime() - start.getTime();
-                            response.put("Duration", this.durationFormat.format(new Date(duration)));
+                            //Format the calcul duration and substract 1 hour cause Java add automaticly 1 hour in duration...
+                            response.put("Duration", this.durationFormat.format(new Date(duration - TimeUnit.HOURS.toMillis(1))));
                     }
                 }
 

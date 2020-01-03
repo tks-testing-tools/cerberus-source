@@ -19,7 +19,6 @@ package org.cerberus.dto;
 
 import java.io.Serializable;
 import java.util.Map;
-import javax.annotation.Nullable;
 
 /**
  *

@@ -27,5 +27,5 @@ import org.cerberus.crud.entity.DashboardEntry;
  */
 public interface IFactoryDashboardEntry {
 
-    public DashboardEntry create(@Nullable Integer idGroup, String codeIndicator, String paramFirst, String paramSecond, String associateElement);
+    public DashboardEntry create(@Nullable Integer idGroup, String codeIndicator, String paramFirst, String paramSecond, String paramThird, String paramFourth, String associateElement);
 }

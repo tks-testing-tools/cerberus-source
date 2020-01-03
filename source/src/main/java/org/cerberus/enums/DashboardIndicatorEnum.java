@@ -22,16 +22,17 @@ import java.util.List;
 import org.cerberus.dto.DashboardIndicatorConfigDTO;
 
 /**
- *
- * @author utilisateur
+ * Enum to store dashboard indicator. 
+ * Used in Dashboard configuration.
+ * @author cDelage
  */
 public enum DashboardIndicatorEnum {
 
-    NOT_VALID("NOT_VALID", "Not valid report item", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.NOT_VALID),
-    CAMPAIGN_EVOLUTION("CAMPAIGN_EVOLUTION", "Campaign evolution", "Start date", "DATE", "End date", "DATE", DashboardTypeIndicatorEnum.CAMPAIGN),
-    CAMPAIGN_LAST_REPORT("CAMPAIGN_LAST_EXE_DETAIL", "Last execution detail", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.CAMPAIGN),
-    STATUS_BY_ENVIRONMENT("STATUS_BY_ENVIRONMENT", "Last status by environment", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.APPLICATION),
-    TESTCASE_EVOLUTION("TESTCASE_EVOLUTION", "evolution test cases", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.APPLICATION);
+    // Store code indicator, title, params and type. For params set DISABLE to title to if necessary.
+    NOT_VALID("NOT_VALID", "Not valid report item", "DISABLE", "", "DISABLE", "", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.NOT_VALID),
+    CAMPAIGN_EVOLUTION("CAMPAIGN_EVOLUTION", "Campaign evolution", "Start date", "DATE", "End date", "DATE", "Number of entry [2,10]", "Number", "DISABLE", "", DashboardTypeIndicatorEnum.CAMPAIGN),
+    CAMPAIGN_LAST_REPORT("CAMPAIGN_LAST_EXE_DETAIL", "Last execution detail", "DISABLE", "", "DISABLE", "","DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.CAMPAIGN);
+
 
     private String codeIndicator;
     private String titleIndicator;
@@ -39,15 +40,23 @@ public enum DashboardIndicatorEnum {
     private String param1Type;
     private String param2Title;
     private String param2Type;
+    private String param3Title;
+    private String param3Type;
+    private String param4Title;
+    private String param4Type;
     private DashboardTypeIndicatorEnum type;
 
-    private DashboardIndicatorEnum(String codeIndicator, String titleIndicator, String param1Title, String param1Type, String param2Title, String param2Type, DashboardTypeIndicatorEnum type) {
+    private DashboardIndicatorEnum(String codeIndicator, String titleIndicator, String param1Title, String param1Type, String param2Title, String param2Type, String param3Title, String param3Type, String param4Title, String param4Type, DashboardTypeIndicatorEnum type) {
         this.codeIndicator = codeIndicator;
         this.titleIndicator = titleIndicator;
         this.param1Title = param1Title;
         this.param1Type = param1Type;
         this.param2Title = param2Title;
         this.param2Type = param2Type;
+        this.param3Title = param3Title;
+        this.param3Type = param3Type;
+        this.param4Title = param4Title;
+        this.param4Type = param4Type;
         this.type = type;
     }
 
@@ -55,7 +64,7 @@ public enum DashboardIndicatorEnum {
         List<DashboardIndicatorConfigDTO> response = new ArrayList();
         for (DashboardIndicatorEnum it : values()) {
             if (it.getType().getTypeIndicator().equals(type)) {
-                response.add(new DashboardIndicatorConfigDTO(it.getCodeIndicator(), it.getTitleIndicator(), it.getParam1Title(), it.getParam1Type(), "DEFAULT", it.getParam2Title(), it.getParam2Type(), "DEFAULT", false, false, ""));
+                response.add(new DashboardIndicatorConfigDTO(it.getCodeIndicator(), it.getTitleIndicator(), it.getParam1Title(), it.getParam1Type(), "DEFAULT", it.getParam2Title(), it.getParam2Type(), "DEFAULT", it.getParam3Title(), it.getParam3Type(), "DEFAULT", it.getParam4Title(), it.getParam4Type(), "DEFAULT", false, false, ""));
             }
         }
         return response;
@@ -146,4 +155,35 @@ public enum DashboardIndicatorEnum {
         this.type = type;
     }
 
+    public String getParam3Title() {
+        return param3Title;
+    }
+
+    public void setParam3Title(String param3Title) {
+        this.param3Title = param3Title;
+    }
+
+    public String getParam3Type() {
+        return param3Type;
+    }
+
+    public void setParam3Type(String param3Type) {
+        this.param3Type = param3Type;
+    }
+
+    public String getParam4Title() {
+        return param4Title;
+    }
+
+    public void setParam4Title(String param4Title) {
+        this.param4Title = param4Title;
+    }
+
+    public String getParam4Type() {
+        return param4Type;
+    }
+
+    public void setParam4Type(String param4Type) {
+        this.param4Type = param4Type;
+    }
 }

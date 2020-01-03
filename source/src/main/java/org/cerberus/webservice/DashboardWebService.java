@@ -80,20 +80,20 @@ public class DashboardWebService {
             }
             return Response.ok(dashboardGroupService.readDashboard(currentUser)).status(200)
                     .header("Access-Control-Allow-Origin", "*")
-                        .header("Access-Control-Allow-Credentials", "true")
-                        .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
-                        .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD").build();
+                    .header("Access-Control-Allow-Credentials", "true")
+                    .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
+                    .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD").build();
         }
         return Response.ok("User exception, please contact your administrator").status(400)
                 .header("Access-Control-Allow-Origin", "*")
-                        .header("Access-Control-Allow-Credentials", "true")
-                        .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
-                        .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD").build();
+                .header("Access-Control-Allow-Credentials", "true")
+                .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
+                .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD").build();
     }
 
     /**
      * Update dashboard statement for an user.
-     * 
+     *
      * @param servletContext
      * @param request
      * @return
@@ -147,8 +147,8 @@ public class DashboardWebService {
     }
 
     /**
-     * Load config from front request sent.
-     * use in update Dashboard process.
+     * Load config from front request sent. use in update Dashboard process.
+     *
      * @param array
      * @return
      */
@@ -169,28 +169,38 @@ public class DashboardWebService {
                 for (int j = 0; j < grp.length(); j++) {
                     LOG.debug("Try to convert group from request " + grp.getJSONObject(j).toString());
                     JSONObject group = grp.getJSONObject(j);
+                    boolean isActiveGroup = group.getBoolean("isActive");
 
-                    //Construct my group
-                    String title = group.getString("title");
-                    Integer sort = group.getInt("sort");
-                    String type = typeConf.getString("typeIndicator");
+                    if (isActiveGroup) {
+                        //Construct my group
+                        String title = group.getString("title");
+                        Integer sort = group.getInt("sort");
+                        String type = typeConf.getString("typeIndicator");
 
-                    List<DashboardIndicatorConfigDTO> indList = new ArrayList();
-                    JSONArray ind = group.getJSONArray("availabilityList");
-                    //For all indicator of group
-                    for (int k = 0; k < ind.length(); k++) {
-                        LOG.debug("Try to convert indicator from request " + ind.getJSONObject(k).toString());
-                        JSONObject indicator = ind.getJSONObject(k);
+                        List<DashboardIndicatorConfigDTO> indList = new ArrayList();
+                        JSONArray ind = group.getJSONArray("availabilityList");
+                        //For all indicator of group
+                        for (int k = 0; k < ind.length(); k++) {
+                            LOG.debug("Try to convert indicator from request " + ind.getJSONObject(k).toString());
+                            JSONObject indicator = ind.getJSONObject(k);
 
-                        //Construct my indicator
-                        String codeIndicator = indicator.getString("codeIndicator");
-                        String param1 = indicator.getString("param1Value");
-                        String param2 = indicator.getString("param2Value");
-                        indList.add(new DashboardIndicatorConfigDTO(codeIndicator, param1, param2));
+                            boolean isActiveIndicator = indicator.getBoolean("isActive");
+
+                            if (isActiveIndicator) {
+                                //Construct my indicator
+                                String codeIndicator = indicator.getString("codeIndicator");
+                                String param1 = indicator.getString("param1Value");
+                                String param2 = indicator.getString("param2Value");
+                                String param3 = indicator.getString("param3Value");
+                                String param4 = indicator.getString("param4Value");
+                                indList.add(new DashboardIndicatorConfigDTO(codeIndicator, param1, param2, param3, param4));
+                            }
+                        }
+
+                        //Add my group to type
+                        grpList.add(new DashboardGroupConfigDTO(title, sort, type, indList, true, false));
                     }
 
-                    //Add my group to type
-                    grpList.add(new DashboardGroupConfigDTO(title, sort, type, indList, true, false));
                 }
 
                 conf.add(new DashboardTypeConfigDTO(typeIndicator, grpList));
@@ -198,6 +208,7 @@ public class DashboardWebService {
 
         } catch (JSONException exception) {
             LOG.error("Exception during Dashboard config extract", exception);
+            conf.clear();
         }
 
         return conf;

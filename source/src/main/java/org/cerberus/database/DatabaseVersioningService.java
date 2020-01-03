@@ -8407,6 +8407,8 @@ public class DatabaseVersioningService implements IDatabaseVersioningService {
                 + "	`code_indicator` varchar(50) NOT NULL,"
                 + "	`param1` varchar(255) DEFAULT NULL,"
                 + "	`param2` varchar(255) DEFAULT NULL,"
+                + "	`param3` varchar(255) DEFAULT NULL,"
+                + "	`param4` varchar(255) DEFAULT NULL,"
                 + "     `UsrCreated` varchar(45) NOT NULL DEFAULT '',"
                 + "     `DateCreated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,"
                 + "     `UsrModif` varchar(45) NOT NULL DEFAULT '',"

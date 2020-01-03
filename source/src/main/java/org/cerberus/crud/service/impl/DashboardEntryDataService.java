@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- *
+ * Service use to search data for dashboard indicator.
  * @author CorentinDelage
  */
 @Service
@@ -48,16 +48,32 @@ public class DashboardEntryDataService implements IDashboardEntryDataService {
 
     public Map<String, Object> read(DashboardEntry dashboardEntry) {
 
-        LOG.debug("Read dashboard data for entry : ", dashboardEntry.getCodeIndicator());
+        LOG.debug("Read dashboard data for entry : " + dashboardEntry.getCodeIndicator());
         Map<String, Object> dashboardEntryData = new HashMap();
         boolean dataFailed = false;
 
         try {
             switch (dashboardEntry.getCodeIndicator()) {
                 case "CAMPAIGN_EVOLUTION":
+
+                    Integer yLadder = 10;
+
+                    if (!dashboardEntry.getParam3Val().equals("DEFAULT")) {
+                        try {
+                            yLadder = Integer.valueOf(dashboardEntry.getParam3Val());
+                            LOG.debug("Y LADDER : "+ yLadder);
+                        } catch (NumberFormatException exception) {
+                            LOG.error("Invalid param ladder for campaign evolution indicator, it will be compute for 10 values by default. Exception : ", exception);
+                        }
+                    }
+                    
                     dashboardEntryData = dashboardCampaignEvolutionDAO.readDataForDashboardEntry(dashboardEntry);
-                    dashboardEntryData = DashboardUtil.reduceMapForChart(dashboardEntryData, 10, false, false, false);
-                    dashboardEntryData = DashboardUtil.computeAdvancement(dashboardEntryData);
+                    long nbEntry = DashboardUtil.computeNbOfEntry(dashboardEntryData, 2);
+                    dashboardEntryData = DashboardUtil.reduceMapForChart(dashboardEntryData, yLadder, false, false, false);
+                    dashboardEntryData = DashboardUtil.computeAdvancement(dashboardEntryData, 2);
+                    dashboardEntryData.put("Y_LADDER", DashboardUtil.generateLadder(dashboardEntryData, 2, 1, 1.25));
+                    dashboardEntryData.put("INITIAL_TOTAL_TAG",nbEntry);
+                    dashboardEntryData.put("FINAL_TOTAL_TAG", DashboardUtil.computeNbOfEntry(dashboardEntryData, 2));
                     break;
                 case "CAMPAIGN_LAST_EXE_DETAIL":
                     dashboardEntryData = dashboardCampainLastReportByStatusDAO.readDataForDashboardEntry(dashboardEntry);

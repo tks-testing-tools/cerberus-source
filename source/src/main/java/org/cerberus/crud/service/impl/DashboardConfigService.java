@@ -169,7 +169,7 @@ public class DashboardConfigService implements IDashboardConfigService {
     public List<DashboardEntry> convertEntryFromConfigDTO(List<DashboardIndicatorConfigDTO> dashboardIndicator){
         List<DashboardEntry> response = new ArrayList();
             for(DashboardIndicatorConfigDTO ent : dashboardIndicator){
-                response.add(factoryDashboardEntry.create(0, ent.getCodeIndicator(), ent.getParam1Value(), ent.getParam2Value(), ""));
+                response.add(factoryDashboardEntry.create(0, ent.getCodeIndicator(), ent.getParam1Value(), ent.getParam2Value(), ent.getParam3Value(), ent.getParam4Value(), ""));
             }
         return response;
     }

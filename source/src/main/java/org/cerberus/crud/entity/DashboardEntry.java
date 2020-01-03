@@ -32,6 +32,8 @@ public class DashboardEntry{
     private Map<String, Object> entryData;
     private String param1Val;
     private String param2Val;
+    private String param3Val;
+    private String param4Val;
     private String associateElement;
 
     public Integer getIdGroup() {
@@ -81,4 +83,22 @@ public class DashboardEntry{
     public void setAssociateElement(String associateElement) {
         this.associateElement = associateElement;
     }
+
+    public String getParam3Val() {
+        return param3Val;
+    }
+
+    public void setParam3Val(String param3Val) {
+        this.param3Val = param3Val;
+    }
+
+    public String getParam4Val() {
+        return param4Val;
+    }
+
+    public void setParam4Val(String param4Val) {
+        this.param4Val = param4Val;
+    }
+    
+    
 }

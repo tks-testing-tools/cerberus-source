@@ -25,8 +25,9 @@ import org.apache.logging.log4j.Logger;
 /**
  * Dashboard util for map data treatment. Made to extract statistics of data or
  * other treatment. All function of this class must be compatible with Dashboard
- * indicator data/ Work with specific map formatted like
- * {"KEY_1":"Value"},{"VALUE_1_1":"value"}...
+ * indicator data/ Work with specific map formatted like a matrix.
+ * {"KEY_1":"Value"},{"VALUE_1_1":"value"},{"VALUE_2_1":"value"}
+ * {"KEY_2":"Value"},{"VALUE_1_2":"value"},{"VALUE_2_2":"value"}
  *
  * Function of this class is called in DashboardEntryDataService.
  *
@@ -44,13 +45,13 @@ public class DashboardUtil {
      * quantile > 1.
      *
      * @param initialMap map formatted for reduce by quantile
-     * @param quantile n-1 of value returned
+     * @param nbEntry n-1 of value returned
      * @param value2 if you add {"VALUE_2_X" : "values"} to your map
      * @param value3 if you add {"VALUE_3_X" : "values"} to your map
      * @param value4 if you add {"VALUE_4_X" : "values"} to your map
      * @return
      */
-    public static Map<String, Object> reduceMapForChart(Map<String, Object> initialMap, Integer quantile, boolean value2, boolean value3, boolean value4) {
+    public static Map<String, Object> reduceMapForChart(Map<String, Object> initialMap, Integer nbEntry, boolean value2, boolean value3, boolean value4) {
         Map<String, Object> response = new HashMap();
 
         //Count number of value sent by map (for example KEY + VALUE1 + VALUE2 = 3)
@@ -66,15 +67,16 @@ public class DashboardUtil {
             numberValues++;
         }
 
-        if (initialMap.size() > quantile && quantile > 1) {
+        if (initialMap.size() > nbEntry && nbEntry > 1) {
 
             try {
                 //Compute real size (including 0 and divise for KEY / VALUE)
                 double initialSize = (initialMap.size() - numberValues) / numberValues;
-                Double indexQuantile = new Double(initialSize / quantile);
 
-                for (int i = 0; i < quantile + 1; i++) {
+                //Search x = n/q-1 to calcul each value in for
+                Double indexQuantile = new Double(initialSize / (nbEntry - 1));
 
+                for (int i = 0; i <= nbEntry; i++) {
                     //Calcul x_quantile * index of list
                     Double specificQuantile = new Double(indexQuantile * i);
                     Double comparator = new Double(specificQuantile.intValue() + 0.5);
@@ -107,7 +109,7 @@ public class DashboardUtil {
                             response.put("VALUE_3_" + responseIndex, "CONVERSION ERROR");
                         }
 
-                        if (value3 && initialMap.get("VALUE_4_" + finalIndex) != null) {
+                        if (value4 && initialMap.get("VALUE_4_" + finalIndex) != null) {
                             response.put("VALUE_4_" + responseIndex, initialMap.get("VALUE_4_" + finalIndex));
                         } else if (value4) {
                             response.put("VALUE_4_" + responseIndex, "CONVERSION ERROR");
@@ -128,15 +130,15 @@ public class DashboardUtil {
      * Compute advancement for each value. work with specific formatted map.
      *
      * @param initialMap
+     * @param nbOfLineIndexed
      * @return
      */
-    public static Map<String, Object> computeAdvancement(Map<String, Object> initialMap) {
+    public static Map<String, Object> computeAdvancement(Map<String, Object> initialMap, Integer nbOfLineIndexed) {
         Map<String, Object> response = new HashMap();
-        if (initialMap.size() > 2) {
-            Integer size = (initialMap.size() / 2) - 2;
+        if (initialMap.size() > nbOfLineIndexed) {
+            int size = (initialMap.size() - nbOfLineIndexed) / nbOfLineIndexed;
             for (int i = 0; i <= size; i++) {
                 if (i != 0) {
-
                     //Parse current number of execution in map index i
                     String objectValue = String.valueOf(initialMap.get("VALUE_1_" + i));
                     Integer nbExe = Integer.valueOf(objectValue);
@@ -159,5 +161,45 @@ public class DashboardUtil {
             return response;
         }
         return initialMap;
+    }
+
+    /**
+     * Compute a ladder by an map and an indice.
+     *
+     * @param initialMap. Map formatted for DashboardUtil
+     * @param nbOfLineIndexed. Number of line values of map (example INDEX_X;
+     * VALUE_1_X; VALUE_2_X = 3)
+     * @param lineTarget. Line target to compute index (for example 2 :
+     * VALUE_2_X)
+     * @param statisticIndex
+     * @return
+     */
+    public static long generateLadder(Map<String, Object> initialMap, long nbOfLineIndexed, long lineTarget, Double statisticIndex) {
+        long maxValue = 0;
+        Double computeLadder = new Double(0);
+        long loopSize = (initialMap.size() - nbOfLineIndexed) / nbOfLineIndexed;
+        for (int i = 0; i < loopSize; i++) {
+            try {
+                String value = String.valueOf(initialMap.get("VALUE_" + lineTarget + "_" + i));
+                Long valueMapped = Long.valueOf(value);
+                if (valueMapped > maxValue) {
+                    maxValue = valueMapped;
+                }
+            } catch (NumberFormatException exception) {
+                LOG.error("error during read value of map : ", exception);
+            }
+            computeLadder = maxValue * statisticIndex;
+        }
+        return computeLadder.intValue();
+    }
+
+    /**
+     * Give number of key / values entry.
+     * @param initialMap
+     * @param nbOfLineIndexed nb of line indexed in map (example : {"KEY_1" : "value"},{"VALUE_1_1" : "value"},{"VALUE_2_1" : "value"} = 3)
+     * @return 
+     */
+    public static long computeNbOfEntry(Map<String, Object> initialMap, Integer nbOfLineIndexed) {
+        return initialMap.size() / nbOfLineIndexed;
     }
 }
