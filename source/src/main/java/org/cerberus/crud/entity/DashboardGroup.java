@@ -25,27 +25,27 @@ import java.util.List;
  */
 public class DashboardGroup {
 
-    private Integer id;
-    private User user;
+    private long id;
     private List<DashboardEntry> dashboardEntries;
+    private long idConfig;
     private Integer sort;
     private String type;
     private String associateElement;
 
-    public Integer getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(long id) {
         this.id = id;
     }
 
-    public User getUser() {
-        return user;
+    public long getIdConfig() {
+        return idConfig;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setIdConfig(long idConfig) {
+        this.idConfig = idConfig;
     }
 
     public List<DashboardEntry> getDashboardEntries() {

@@ -18,12 +18,15 @@
 package org.cerberus.crud.service;
 
 import java.util.List;
+import java.util.Map;
+import org.cerberus.crud.entity.DashboardConfig;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.entity.User;
 import org.cerberus.dto.DashboardGroupConfigDTO;
 import org.cerberus.dto.DashboardIndicatorConfigDTO;
 import org.cerberus.dto.DashboardTypeConfigDTO;
+import org.cerberus.dto.MessageEventSlimDTO;
 
 /**
  *
@@ -31,9 +34,24 @@ import org.cerberus.dto.DashboardTypeConfigDTO;
  */
 public interface IDashboardConfigService {
 
-    public List<DashboardTypeConfigDTO> readStatement(List<DashboardGroup> dashboardGroup);
+    public Map<String, Object> readStatement(DashboardConfig conf);
 
-    public DashboardGroup dashboardGroupFromConfigDTO(DashboardGroupConfigDTO dashboardGroupConfigDTO, User user);
+    public DashboardGroup dashboardGroupFromConfigDTO(DashboardGroupConfigDTO dashboardGroupConfigDTO, long idConfig);
 
     public List<DashboardEntry> convertEntryFromConfigDTO(List<DashboardIndicatorConfigDTO> dashboardIndicator);
+    
+    public long create(DashboardConfig conf, User user);
+    
+    public List<DashboardConfig> readConfigForUser(User user);
+    
+    public DashboardConfig read(String title, User user);
+    
+    public MessageEventSlimDTO delete(String title);
+    
+    public Map<String, Object> readDashboard(User user, String title);
+    
+    public MessageEventSlimDTO checkDashboardIntegrity(List<DashboardGroup> listGroup);
+    
+    public List<MessageEventSlimDTO> saveConfig(List<DashboardTypeConfigDTO> dashboardGroupDTO, String titleConfig, User user, User usrCreated);
+    
 }

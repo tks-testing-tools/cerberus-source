@@ -17,7 +17,10 @@
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
 package org.cerberus.util;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,11 +28,12 @@ import org.apache.logging.log4j.Logger;
 /**
  * Dashboard util for map data treatment. Made to extract statistics of data or
  * other treatment. All function of this class must be compatible with Dashboard
- * indicator data/ Work with specific map formatted like a matrix.
+ * indicator data/ Work with specific map formatted like a matrix :
  * {"KEY_1":"Value"},{"VALUE_1_1":"value"},{"VALUE_2_1":"value"}
  * {"KEY_2":"Value"},{"VALUE_1_2":"value"},{"VALUE_2_2":"value"}
  *
- * Function of this class is called in DashboardEntryDataService.
+ * Target is always format dashboardindicator like it to use this class for
+ * treatment.
  *
  * @author cDelage
  */
@@ -38,81 +42,55 @@ public class DashboardUtil {
     private static final Logger LOG = LogManager.getLogger(DashboardUtil.class);
 
     /**
-     * Extract value of each approximate quantile for a map (reduce data for
-     * linear chart). Work for specific map formatted with key like :
-     * {"KEY_1":"Value"},{"VALUE_1_1":"value"},{"VALUE2_1":"Value"} It made to
-     * reduce map to specific number of value for chart logic. Work with
-     * quantile > 1.
-     *
-     * @param initialMap map formatted for reduce by quantile
-     * @param nbEntry n-1 of value returned
-     * @param value2 if you add {"VALUE_2_X" : "values"} to your map
-     * @param value3 if you add {"VALUE_3_X" : "values"} to your map
-     * @param value4 if you add {"VALUE_4_X" : "values"} to your map
+     * reduce map values for chart. Work with formatted map. Read value at
+     * regular interval in a line. 
+     * Example : if i take 100 value and i want 12 entry (for 11 nbValueReturned cause index begin 0)
+     * function will return [0,10,20,30,40,50,60,70,80,90,100]
+     * @param initMap
+     * @param nbValueReturned
+     * @param nbLineIndexed
      * @return
      */
-    public static Map<String, Object> reduceMapForChart(Map<String, Object> initialMap, Integer nbEntry, boolean value2, boolean value3, boolean value4) {
+    public static Map<String, Object> reduceMapForChart(Map<String, Object> initMap, Integer nbValueReturned, Integer nbLineIndexed) {
         Map<String, Object> response = new HashMap();
 
-        //Count number of value sent by map (for example KEY + VALUE1 + VALUE2 = 3)
-        int numberValues = 2;
-
-        if (value2) {
-            numberValues++;
-        }
-        if (value3) {
-            numberValues++;
-        }
-        if (value4) {
-            numberValues++;
-        }
-
-        if (initialMap.size() > nbEntry && nbEntry > 1) {
+        if (initMap.size() > nbValueReturned && nbValueReturned > 1) {
 
             try {
                 //Compute real size (including 0 and divise for KEY / VALUE)
-                double initialSize = (initialMap.size() - numberValues) / numberValues;
+                double initialSize = DashboardUtil.computeSize(initMap, nbLineIndexed);
 
-                //Search x = n/q-1 to calcul each value in for
-                Double indexQuantile = new Double(initialSize / (nbEntry - 1));
+                Integer quantileValue = nbValueReturned - 1;
+                
+                //Search x = n/q-1 to compute an regular interval index.
+                Double indexQuantile = new Double(initialSize / (quantileValue));
 
-                for (int i = 0; i <= nbEntry; i++) {
-                    //Calcul x_quantile * index of list
+                for (int i = 0; i <= nbValueReturned ; i++) {
+                    //Calcul x_quantile * index of line
                     Double specificQuantile = new Double(indexQuantile * i);
                     Double comparator = new Double(specificQuantile.intValue() + 0.5);
-                    int finalIndex = specificQuantile.intValue();
+                    int initIndex = specificQuantile.intValue();
+                    
                     //If finalIndex decimal is > 0.5 -> final index get next int value
                     if (comparator < specificQuantile) {
-                        finalIndex++;
+                        initIndex++;
                     }
 
                     //Count response size by number of value list insert to exctract index
-                    int responseIndex = response.size() / numberValues;
+                    int responseIndex = response.size() / nbLineIndexed;
 
-                    if (initialMap.get("KEY_" + finalIndex) != null) {
-                        response.put("KEY_" + responseIndex, initialMap.get("KEY_" + finalIndex));
-                        if (initialMap.get("VALUE_1_" + finalIndex) != null) {
-                            response.put("VALUE_1_" + responseIndex, initialMap.get("VALUE_1_" + finalIndex));
-                        } else {
-                            response.put("VALUE_1_" + responseIndex, "CONVERSION ERROR");
-                        }
+                    //If key_x have a value
+                    if (DashboardUtil.getStringEntryKey(initMap, initIndex) != null) {
+                        //Set it to response
+                        response.put("KEY_" + responseIndex, DashboardUtil.getStringEntryKey(initMap, initIndex));
 
-                        if (value2 && initialMap.get("VALUE_2_" + finalIndex) != null) {
-                            response.put("VALUE_2_" + responseIndex, initialMap.get("VALUE_2_" + finalIndex));
-                        } else if (value2) {
-                            response.put("VALUE_2_" + responseIndex, "CONVERSION ERROR");
-                        }
-
-                        if (value3 && initialMap.get("VALUE_3_" + finalIndex) != null) {
-                            response.put("VALUE_3_" + responseIndex, initialMap.get("VALUE_3_" + finalIndex));
-                        } else if (value3) {
-                            response.put("VALUE_3_" + responseIndex, "CONVERSION ERROR");
-                        }
-
-                        if (value4 && initialMap.get("VALUE_4_" + finalIndex) != null) {
-                            response.put("VALUE_4_" + responseIndex, initialMap.get("VALUE_4_" + finalIndex));
-                        } else if (value4) {
-                            response.put("VALUE_4_" + responseIndex, "CONVERSION ERROR");
+                        //For all values line, set values
+                        for (int j = 1; j <= nbLineIndexed - 1; j++) {
+                            if (DashboardUtil.getStringEntryValue(initMap, j, initIndex) != null) {
+                                response.put("VALUE_" + j + "_" + responseIndex, DashboardUtil.getStringEntryValue(initMap, j, initIndex));
+                            } else {
+                                response.put("VALUE_1_" + responseIndex, "CONVERSION ERROR");
+                            }
                         }
                     }
                 }
@@ -123,83 +101,190 @@ public class DashboardUtil {
             }
 
         }
-        return initialMap;
+        return initMap;
     }
 
     /**
-     * Compute advancement for each value. work with specific formatted map.
+     * Compute advancement for each values of map indexed. work with specific
+     * formatted map.
      *
-     * @param initialMap
-     * @param nbOfLineIndexed
+     * @param initMap
+     * @param nbLineIndexed
      * @return
      */
-    public static Map<String, Object> computeAdvancement(Map<String, Object> initialMap, Integer nbOfLineIndexed) {
+    public static Map<String, Object> computeAdvancement(Map<String, Object> initMap, Integer nbLineIndexed, Integer targetLine) {
         Map<String, Object> response = new HashMap();
-        if (initialMap.size() > nbOfLineIndexed) {
-            int size = (initialMap.size() - nbOfLineIndexed) / nbOfLineIndexed;
+        if (initMap.size() > nbLineIndexed) {
+            Integer size = DashboardUtil.computeSize(initMap, nbLineIndexed);
             for (int i = 0; i <= size; i++) {
                 if (i != 0) {
                     //Parse current number of execution in map index i
-                    String objectValue = String.valueOf(initialMap.get("VALUE_1_" + i));
-                    Integer nbExe = Integer.valueOf(objectValue);
+                    Long nbExe = DashboardUtil.getLongEntryValue(initMap, targetLine, i);
 
                     //Get last number of execution in map index i
-                    String lastValue = String.valueOf(initialMap.get("VALUE_1_" + (i - 1)));
-                    Integer nbLastExe = Integer.valueOf(lastValue);
+                    Long nbLastExe = DashboardUtil.getLongEntryValue(initMap, targetLine, (i - 1));
 
                     //Compute advancement
-                    Integer advancement = nbExe - nbLastExe;
+                    Long advancement = nbExe - nbLastExe;
 
                     //Set values to response
-                    response.put("KEY_" + i, initialMap.get("KEY_" + i));
+                    response.put("KEY_" + i, DashboardUtil.getStringEntryKey(initMap, i));
                     response.put("VALUE_1_" + i, advancement);
                 } else {
-                    response.put("KEY_0", initialMap.get("KEY_0"));
-                    response.put("VALUE_1_0", initialMap.get("VALUE_1_0"));
+                    response.put("KEY_0", DashboardUtil.getStringEntryKey(initMap, 0));
+                    response.put("VALUE_1_0", DashboardUtil.getStringEntryValue(initMap, targetLine, 0));
                 }
             }
             return response;
         }
-        return initialMap;
+        return initMap;
     }
 
     /**
      * Compute a ladder by an map and an indice.
-     *
-     * @param initialMap. Map formatted for DashboardUtil
-     * @param nbOfLineIndexed. Number of line values of map (example INDEX_X;
-     * VALUE_1_X; VALUE_2_X = 3)
-     * @param lineTarget. Line target to compute index (for example 2 :
-     * VALUE_2_X)
-     * @param statisticIndex
-     * @return
+     * Work with formatted map. 
+     * @param initMap.
+     * @param nbLineIndexed
+     * @param targetLine
+     * @param scaleMultiplier
+     * @return scale formatted like : highest value of line * 
      */
-    public static long generateLadder(Map<String, Object> initialMap, long nbOfLineIndexed, long lineTarget, Double statisticIndex) {
+    public static long generateScale(Map<String, Object> initMap, int nbLineIndexed, long targetLine, Double scaleMultiplier) {
         long maxValue = 0;
         Double computeLadder = new Double(0);
-        long loopSize = (initialMap.size() - nbOfLineIndexed) / nbOfLineIndexed;
-        for (int i = 0; i < loopSize; i++) {
+        int loopSize = DashboardUtil.computeSize(initMap, nbLineIndexed);
+        for (int i = 0; i <= loopSize; i++) {
             try {
-                String value = String.valueOf(initialMap.get("VALUE_" + lineTarget + "_" + i));
-                Long valueMapped = Long.valueOf(value);
+                Long valueMapped = DashboardUtil.getLongEntryValue(initMap, targetLine, i);
                 if (valueMapped > maxValue) {
                     maxValue = valueMapped;
                 }
             } catch (NumberFormatException exception) {
                 LOG.error("error during read value of map : ", exception);
             }
-            computeLadder = maxValue * statisticIndex;
+            computeLadder = maxValue * scaleMultiplier;
         }
         return computeLadder.intValue();
     }
 
     /**
      * Give number of key / values entry.
-     * @param initialMap
-     * @param nbOfLineIndexed nb of line indexed in map (example : {"KEY_1" : "value"},{"VALUE_1_1" : "value"},{"VALUE_2_1" : "value"} = 3)
-     * @return 
+     *
+     * @param initMap
+     * @param nbLineIndexed 
+     * @return
      */
-    public static long computeNbOfEntry(Map<String, Object> initialMap, Integer nbOfLineIndexed) {
-        return initialMap.size() / nbOfLineIndexed;
+    public static long computeNbEntry(Map<String, Object> initMap, long nbLineIndexed) {
+        return initMap.size() / nbLineIndexed;
+    }
+
+    /**
+     * Compute average for one line of map indexed.
+     *
+     * @param initMap
+     * @param nbLineIndexed
+     * @param targetLine
+     * @return
+     */
+    public static long computeAverage(Map<String, Object> initMap, int nbLineIndexed, long targetLine) {
+        int size = DashboardUtil.computeSize(initMap, nbLineIndexed);
+        long storeValue = 0;
+        long response = 0;
+
+        for (int i = 0; i < size; i++) {
+            try {
+                Long value = DashboardUtil.getLongEntryValue(initMap, targetLine, i);
+                storeValue += value;
+            } catch (NumberFormatException exception) {
+                LOG.error("Invalid data pass to computeMedian, impossible to compute median cause : ", exception);
+                return 0;
+            }
+        }
+        response = storeValue / size;
+        return response;
+    }
+
+    /**
+     * Compute median of map smell indexed.
+     *
+     * @param initMap
+     * @param nbLineIndexed
+     * @param targetLine
+     * @return
+     */
+    public static long computeMedian(Map<String, Object> initMap, int nbLineIndexed, long targetLine) {
+        long response = 0;
+        try {
+            int sizeLoop = DashboardUtil.computeSize(initMap, nbLineIndexed);
+            List<Long> values = new ArrayList();
+
+            for (int i = 1; i <= sizeLoop; i++) {
+                values.add(DashboardUtil.getLongEntryValue(initMap, targetLine, i));
+            }
+            Collections.sort(values);
+            int medianIndex = values.size() / 2;
+            response = values.get(medianIndex);
+
+        } catch (Exception exception) {
+            LOG.error("Error during median computing, catch exception : ", exception);
+        }
+
+        return response;
+    }
+
+    /**
+     * Compute size for map by line indexed. (initMap.size - nbLineIndexed) /
+     * nbLineIndexed Compute it for loop sizing for example.
+     *
+     * @param initMap
+     * @param nbLineIndexed
+     * @return
+     */
+    public static int computeSize(Map<String, Object> initMap, int nbLineIndexed) {
+        return (initMap.size() - nbLineIndexed) / nbLineIndexed;
+    }
+
+    /**
+     * Extract int value from map indexed.
+     *
+     * @param initMap
+     * @param targetLine index of line target
+     * @param targetIndex index of indice target
+     * @return
+     */
+    public static long getLongEntryValue(Map<String, Object> initMap, long targetLine, long targetIndex) {
+        long response = 0;
+        try {
+            String value = DashboardUtil.getStringEntryValue(initMap, targetLine, targetIndex);
+            response = Long.valueOf(value);
+        } catch (NumberFormatException exception) {
+            LOG.error("Impossible to parse value in integer : ", exception);
+            return 0;
+        }
+        return response;
+    }
+
+    /**
+     * Get string value from map entry. read string value in initmap indexed
+     * like : VALUE_(targetLine)_(targetIndex)
+     *
+     * @param initMap
+     * @param targetLine
+     * @param targetIndex
+     * @return
+     */
+    public static String getStringEntryValue(Map<String, Object> initMap, long targetLine, long targetIndex) {
+        return String.valueOf(initMap.get("VALUE_" + targetLine + "_" + targetIndex));
+    }
+
+    /**
+     * Read key entry for indexed map. Read value of KEY_(targetIndex)
+     *
+     * @param initMap
+     * @param targetIndex
+     * @return
+     */
+    public static String getStringEntryKey(Map<String, Object> initMap, long targetIndex) {
+        return String.valueOf(initMap.get("KEY_" + targetIndex));
     }
 }

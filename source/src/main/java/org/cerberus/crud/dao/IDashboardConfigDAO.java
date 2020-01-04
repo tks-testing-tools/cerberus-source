@@ -15,27 +15,28 @@
 
  You should have received a copy of the GNU General Public License
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
-package org.cerberus.crud.service;
+package org.cerberus.crud.dao;
 
+import java.sql.ResultSet;
 import java.util.List;
 import org.cerberus.crud.entity.DashboardConfig;
-import org.cerberus.crud.entity.DashboardGroup;
-import org.cerberus.dto.DashboardGroupDTO;
+import org.cerberus.crud.entity.User;
 import org.cerberus.dto.MessageEventSlimDTO;
 
 /**
  *
- * @author utilisateur
+ * @author cDelage
  */
-public interface IDashboardGroupService {
+public interface IDashboardConfigDAO {
 
-    public List<DashboardGroup> readByIdConfig(long idConfig);
+    public long create(DashboardConfig conf, User user);
 
-    public List<DashboardGroup> readDashboardContent(DashboardConfig dashboardConfig);
+    public MessageEventSlimDTO delete(String title);
 
-    public DashboardGroupDTO dashboardGroupToDTO(DashboardGroup dashboardGroupEntries);
+    public DashboardConfig read(String title, User user);
 
-    public Integer create(DashboardGroup dashboardGroup);
+    public List<DashboardConfig> readConfigForUser(User user);
 
-    public List<MessageEventSlimDTO> saveGroupList(DashboardConfig dashboardConfig);
+    public DashboardConfig loadFromResultSet(ResultSet rs, User user);
+
 }

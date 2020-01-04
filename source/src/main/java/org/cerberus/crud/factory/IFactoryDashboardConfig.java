@@ -19,18 +19,17 @@ along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
 package org.cerberus.crud.factory;
 
 import java.util.List;
-import javax.annotation.Nullable;
-import org.cerberus.crud.entity.DashboardEntry;
+import org.cerberus.crud.entity.DashboardConfig;
 import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.entity.User;
 
 /**
- *
- * @author utilisateur
+ * Factory for dashboard configuration.
+ * @author cDelage
  */
 
 
-public interface IFactoryDashboardGroup {
+public interface IFactoryDashboardConfig {
     
-    public DashboardGroup create(@Nullable long id, long idConfig,  @Nullable List<DashboardEntry> dashboardEntries, Integer sort, @Nullable String associateElement, @Nullable String type); 
+    public DashboardConfig create(long idConfig, String title, User user);    
 }

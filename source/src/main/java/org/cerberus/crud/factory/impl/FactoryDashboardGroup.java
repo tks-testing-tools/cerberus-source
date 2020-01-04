@@ -33,10 +33,10 @@ import org.springframework.stereotype.Service;
 public class FactoryDashboardGroup implements IFactoryDashboardGroup {
     
     @Override
-    public DashboardGroup create(@Nullable Integer id, @Nullable User user, @Nullable List<DashboardEntry> dashboardEntries, Integer sort, @Nullable String associateElement, @Nullable String type) {
+    public DashboardGroup create(@Nullable long id, long idConfig,  @Nullable List<DashboardEntry> dashboardEntries, Integer sort, @Nullable String associateElement, @Nullable String type) {
         DashboardGroup dashboardGroupEntries = new DashboardGroup();
         dashboardGroupEntries.setId(id);
-        dashboardGroupEntries.setUser(user);
+        dashboardGroupEntries.setIdConfig(idConfig);
         dashboardGroupEntries.setDashboardEntries(dashboardEntries);
         dashboardGroupEntries.setSort(sort);
         dashboardGroupEntries.setAssociateElement(associateElement);

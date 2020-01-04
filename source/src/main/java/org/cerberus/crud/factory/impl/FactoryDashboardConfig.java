@@ -15,27 +15,27 @@
 
  You should have received a copy of the GNU General Public License
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
-package org.cerberus.crud.service;
+package org.cerberus.crud.factory.impl;
 
 import java.util.List;
 import org.cerberus.crud.entity.DashboardConfig;
 import org.cerberus.crud.entity.DashboardGroup;
-import org.cerberus.dto.DashboardGroupDTO;
-import org.cerberus.dto.MessageEventSlimDTO;
+import org.cerberus.crud.entity.User;
+import org.cerberus.crud.factory.IFactoryDashboardConfig;
+import org.springframework.stereotype.Service;
 
 /**
  *
- * @author utilisateur
+ * @author cDelage
  */
-public interface IDashboardGroupService {
+@Service
+public class FactoryDashboardConfig implements IFactoryDashboardConfig {
 
-    public List<DashboardGroup> readByIdConfig(long idConfig);
-
-    public List<DashboardGroup> readDashboardContent(DashboardConfig dashboardConfig);
-
-    public DashboardGroupDTO dashboardGroupToDTO(DashboardGroup dashboardGroupEntries);
-
-    public Integer create(DashboardGroup dashboardGroup);
-
-    public List<MessageEventSlimDTO> saveGroupList(DashboardConfig dashboardConfig);
+    public DashboardConfig create(long idConfig, String title, User user) {
+        DashboardConfig conf = new DashboardConfig();
+        conf.setIdConfig(idConfig);
+        conf.setTitle(title);
+        conf.setUser(user);
+        return conf;
+    }
 }

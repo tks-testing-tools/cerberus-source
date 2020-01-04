@@ -32,7 +32,6 @@ import org.cerberus.crud.entity.User;
 import org.cerberus.crud.factory.IFactoryDashboardGroup;
 import org.cerberus.database.DatabaseSpring;
 import org.cerberus.dto.MessageEventSlimDTO;
-import org.cerberus.engine.entity.MessageEvent;
 import org.cerberus.enums.MessageEventEnum;
 import org.cerberus.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,21 +53,20 @@ public class DashboardGroupDAO implements IDashboardGroupDAO {
     private IFactoryDashboardGroup factoryDashboardGroupEntries;
 
     @Override
-    public List<DashboardGroup> readByUser(User user) {
-        LOG.debug("DASHBOARD GROUP readByUser DAO");
+    public List<DashboardGroup> readByIdConfig(long idConfig) {
         List<DashboardGroup> response = new ArrayList();
         StringBuilder query = new StringBuilder();
-        query.append("SELECT `id_group`,`sort`,`usr_id`,`associate_element`, `type` "
+        query.append("SELECT `id_group`,`id_config`,`sort`,`associate_element`,`type` "
                 + "FROM `dashboardgroup`"
-                + "WHERE `usr_id`= ? ;");
+                + "WHERE `id_config`= ? ;");
 
         try {
             Connection connection = this.databaseSpring.connect();
             PreparedStatement preStat = connection.prepareStatement(query.toString());
-            preStat.setInt(1, user.getUserID());
+            preStat.setLong(1, idConfig);
             ResultSet rs = preStat.executeQuery();
             while (rs.next()) {
-                response.add(this.loadFromResultSet(rs, user));
+                response.add(this.loadFromResultSet(rs));
             }
         } catch (SQLException exception) {
             LOG.error("Catch sql exception during Dashboard group entries read : ", exception);
@@ -79,32 +77,34 @@ public class DashboardGroupDAO implements IDashboardGroupDAO {
     }
 
     @Override
-    public DashboardGroup loadFromResultSet(ResultSet rs, User user) throws SQLException {
+    public DashboardGroup loadFromResultSet(ResultSet rs) throws SQLException {
         Integer id = rs.getInt("id_group");
+        Integer idConf = rs.getInt("id_config");
         Integer sort = rs.getInt("sort");
         String type = rs.getString("type");
         String associateElement = rs.getString("associate_element");
-        return factoryDashboardGroupEntries.create(id, user, null, sort, associateElement, type);
+        return factoryDashboardGroupEntries.create(id, idConf, null, sort, associateElement, type);
     }
 
     @Override
     public Integer create(DashboardGroup dashboardGroup) {
         Integer result = 0;
-        final String query = "INSERT INTO `dashboardgroup`(`sort`, `usr_id`, `type`,`associate_element`) VALUES (?,?,?,?)";
+        LOG.debug("Try to insert dashboard group : "+ dashboardGroup.getAssociateElement());
+        final String query = "INSERT INTO `dashboardgroup`(`sort`, `id_config`, `type`,`associate_element`) VALUES (?,?,?,?)";
 
         try {
             Connection connection = databaseSpring.connect();
             try {
                 PreparedStatement preStat = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
                 try {
-
-                    preStat.setInt(1, dashboardGroup.getSort());
-                    preStat.setInt(2, dashboardGroup.getUser().getUserID());
-                    preStat.setString(3, dashboardGroup.getType());
+                    int i = 1;
+                    preStat.setInt(i++, dashboardGroup.getSort());
+                    preStat.setLong(i++, dashboardGroup.getIdConfig());
+                    preStat.setString(i++, dashboardGroup.getType());
                     if (!StringUtil.isNullOrEmpty(dashboardGroup.getAssociateElement())) {
-                        preStat.setString(4, dashboardGroup.getAssociateElement());
+                        preStat.setString(i++, dashboardGroup.getAssociateElement());
                     } else {
-                        preStat.setString(4, "");
+                        preStat.setString(i++, "");
                     }
                     preStat.execute();
                     ResultSet resultSet = preStat.getGeneratedKeys();
@@ -132,41 +132,5 @@ public class DashboardGroupDAO implements IDashboardGroupDAO {
         }
 
         return result;
-    }
-
-    @Override
-    public MessageEventSlimDTO cleanByUser(User user) {
-        final String query = "DELETE FROM dashboardgroup WHERE usr_id = ?";
-        MessageEventSlimDTO response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_DELETE_SUCCESS);
-        try {
-            Connection connection = databaseSpring.connect();
-            try {
-                PreparedStatement preStat = connection.prepareStatement(query);
-                try {
-                    preStat.setInt(1, user.getUserID());
-                    preStat.execute();
-                    
-                } catch (SQLException exception) {
-                    LOG.error("Unable to execute query : " + exception.toString());
-                    response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_DELETE_GROUP_FAILED);
-                    response.setDescription(response.getDescription().replace("%CAUSE%", exception.getLocalizedMessage()));
-                } finally {
-                    preStat.close();
-                }
-            } catch (SQLException exception) {
-                LOG.error("Unable to execute query : " + exception.toString());
-            } finally {
-                try {
-                    if (connection != null) {
-                        connection.close();
-                    }
-                } catch (SQLException e) {
-                    LOG.warn(e.toString());
-                }
-            }
-        } catch (Exception exception) {
-            LOG.error("Failed to connect to database, catched Exception : ", exception);
-        }
-        return response;
     }
 }

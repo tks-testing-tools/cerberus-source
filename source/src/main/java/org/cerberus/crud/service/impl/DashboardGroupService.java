@@ -25,6 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cerberus.crud.dao.IDashboardGroupDAO;
 import org.cerberus.crud.entity.Campaign;
+import org.cerberus.crud.entity.DashboardConfig;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroup;
 import org.cerberus.crud.entity.User;
@@ -35,7 +36,6 @@ import org.cerberus.crud.service.IDashboardEntryService;
 import org.cerberus.crud.service.IDashboardGroupService;
 import org.cerberus.dto.DashboardEntryDTO;
 import org.cerberus.dto.DashboardGroupDTO;
-import org.cerberus.dto.DashboardGroupConfigDTO;
 import org.cerberus.dto.DashboardTypeConfigDTO;
 import org.cerberus.dto.MessageEventSlimDTO;
 import org.cerberus.enums.DashboardIndicatorEnum;
@@ -62,12 +62,6 @@ public class DashboardGroupService implements IDashboardGroupService {
     private IDashboardEntryService dashboardEntryService;
 
     @Autowired
-    private IApplicationService applicationService;
-
-    @Autowired
-    private ICampaignService campaignService;
-
-    @Autowired
     private IDashboardConfigService dashboardConfigService;
 
     /**
@@ -77,80 +71,37 @@ public class DashboardGroupService implements IDashboardGroupService {
      * @return
      */
     @Override
-    public Map<String, Object> readDashboard(User user) {
+    public List<DashboardGroup> readDashboardContent(DashboardConfig dashboardConfig) {
 
-        LOG.debug("Read dashboard for user : ", user.getLogin());
-
-        Map<String, Object> response = new HashMap();
-        List<DashboardGroupDTO> dashboardGroupListDTO = new ArrayList();
         List<DashboardGroup> dashboardGroupList = new ArrayList();
-        List<MessageEventSlimDTO> eventList = new ArrayList();
 
         //Read all group for Dashboard
-        dashboardGroupList = this.readByUser(user);
+        dashboardGroupList = this.readByIdConfig(dashboardConfig.getIdConfig());
 
         //Get all dashboard entry for groups
         for (DashboardGroup grp : dashboardGroupList) {
             grp.setDashboardEntries(this.dashboardEntryService.readByGroupEntriesWithData(grp));
-            dashboardGroupListDTO.add(this.dashboardGroupToDTO(grp));
         }
-        response.put("DashboardContent", dashboardGroupListDTO);
-
-        //Control size of groups for send MESSAGE_EVENT empty or success
-        if (dashboardGroupListDTO.isEmpty()) {
-            eventList.add(new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_READ_GROUP_EMPTY));
-        } else if (dashboardGroupListDTO.size() > 0) {
-            eventList.add(new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_READ_GROUP_SUCCESS));
-        }
-
-        //Add Dashboard config statement (All type/group/entry active for user config)
-        List<DashboardTypeConfigDTO> dashboardStatement = this.dashboardConfigService.readStatement(dashboardGroupList);
-        response.put("DashboardConfig", dashboardStatement);
-
-        if (dashboardStatement.isEmpty()) {
-            eventList.add(new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_READ_AVAILABILITY_FAILED));
-        } else {
-            eventList.add(new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_READ_AVAILABILITY_SUCCESS));
-        }
-
-        response.put("MessageEvent_List", eventList);
-
-        return response;
+        
+        return dashboardGroupList;
     }
 
     /**
-     * Update dashboard statement
+     * Save group of Dashboard
      *
      * @param dashboardGroupDTO
      * @param user
      * @return
      */
     @Override
-    public List<MessageEventSlimDTO> updateDashboard(List<DashboardTypeConfigDTO> dashboardGroupDTO, User user) {
+    public List<MessageEventSlimDTO> saveGroupList(DashboardConfig dashboardConfig) {
 
-        LOG.info("Update Dashboard started");
-
-        List<DashboardGroup> dashboardGroup = new ArrayList();
+        List<DashboardGroup> dashboardGroup = dashboardConfig.getGroupList();
         List<MessageEventSlimDTO> responseEvent = new ArrayList();
-
-        for (DashboardTypeConfigDTO type : dashboardGroupDTO) {
-            for (DashboardGroupConfigDTO grp : type.getGroupList()) {
-                dashboardGroup.add(this.dashboardConfigService.dashboardGroupFromConfigDTO(grp, user));
-            }
-        }
-
-        MessageEventSlimDTO checkerDashboard = this.checkDashboardIntegrity(dashboardGroup);
-        responseEvent.add(checkerDashboard);
-
-        //If dashboard integrity is valid by checker
-        if (checkerDashboard.getCode() == 200) {
-
-            //Clean user dashboard and put result in response
-            responseEvent.add(this.cleanByUser(user));
-
+        
             //For each group -> insert in database
             for (DashboardGroup it : dashboardGroup) {
-                LOG.debug("DashboardGroup iterator : ", it.getAssociateElement());
+                it.setIdConfig(dashboardConfig.getIdConfig());
                 Integer idGroup = this.create(it);
 
                 if (idGroup > 0) {
@@ -171,143 +122,7 @@ public class DashboardGroupService implements IDashboardGroupService {
                     responseEvent.add(event);
                 }
             }
-        } else if (checkerDashboard.getCode() == 300) {
-            //Clean user dashboard and put result in response
-            responseEvent.add(this.cleanByUser(user));
-        }
         return responseEvent;
-    }
-
-    /**
-     * Checker for dashboard integrity
-     *
-     * @param listGroup
-     * @return
-     */
-    @Override
-    public MessageEventSlimDTO checkDashboardIntegrity(List<DashboardGroup> listGroup) {
-        MessageEventSlimDTO response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_CHECKER_SUCCESS);
-        LOG.info("Start checker for dashboard integrity");
-
-        if (listGroup.size() == 0) {
-            LOG.debug("Dashboard sent is empty");
-            response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_CHECKER_EMPTY);
-            return response;
-        }
-
-        //Control no duplication group
-        for (int i = 0; i < listGroup.size(); i++) {
-            for (int j = 0; j < listGroup.size(); j++) {
-                if (listGroup.get(i).getAssociateElement().equals(listGroup.get(j).getAssociateElement()) && i != j) {
-                    LOG.error("Check dashboard update integrity failed cause duplicate group" + listGroup.get(i).getAssociateElement());
-                    response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_CHECKER_FAILED);
-                    response.setDescription(response.getDescription().replace("%CAUSE%", "duplicate group %GROUP%"));
-                    response.setDescription(response.getDescription().replace("%GROUP%", listGroup.get(i).getAssociateElement()));
-                    return response;
-                }
-            }
-        }
-
-        for (DashboardGroup grp : listGroup) {
-
-            //Verify type of group is correct
-            if (!DashboardTypeIndicatorEnum.verifyType(grp.getType())) {
-                LOG.error("Check dashboard update integrity failed cause type don't exist for group " + grp.getAssociateElement());
-                response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_CHECKER_FAILED);
-                response.setDescription(response.getDescription().replace("%CAUSE%", "suspicious type indicator %TYPE%"));
-                response.setDescription(response.getDescription().replace("%TYPE%", grp.getType()));
-                return response;
-            }
-
-            //If type is APPLICATION
-            if (grp.getType().equals("APPLICATION")) {
-                //Then verify application exist
-                if (!this.applicationService.exist(grp.getAssociateElement())) {
-                    // if not return failed message
-                    LOG.error("Check dashboard update integrity failed cause application don't exist " + grp.getAssociateElement());
-                    response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_CHECKER_FAILED);
-                    response.setDescription(response.getDescription().replace("%CAUSE%", "undeclared application"));
-                    return response;
-                }
-            }
-
-            //If type is CAMPAIGN
-            if (grp.getType().equals("CAMPAIGN")) {
-                //Then i verify campaign associated existing
-                AnswerItem<Campaign> campaignAns = this.campaignService.readByKey(grp.getAssociateElement());
-                if (!campaignAns.isCodeEquals(MessageEventEnum.DATA_OPERATION_OK.getCode()) || campaignAns.getItem() == null) {
-                    //if not return failed message
-                    LOG.error("Check dashboard update integrity failed cause campaign don't exist " + grp.getAssociateElement());
-                    response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_CHECKER_FAILED);
-                    response.setDescription(response.getDescription().replace("%CAUSE%", "undeclared campaign %CAMPAIGN%"));
-                    response.setDescription(response.getDescription().replace("%CAMPAIGN%", grp.getAssociateElement()));
-
-                    return response;
-                }
-            }
-
-            //Control there isn't duplicate indicator for group
-            for (int i = 0; i < grp.getDashboardEntries().size(); i++) {
-                for (int j = 0; j < grp.getDashboardEntries().size(); j++) {
-                    if (grp.getDashboardEntries().get(i).getCodeIndicator().equals(grp.getDashboardEntries().get(j).getCodeIndicator()) && i != j) {
-                        LOG.error("Check dashboard update integrity failed cause indicator duplicate" + grp.getDashboardEntries().get(i).getCodeIndicator());
-                        response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_CHECKER_FAILED);
-                        response.setDescription(response.getDescription().replace("%CAUSE%", "duplicate indicator %INDICATOR%"));
-                        response.setDescription(response.getDescription().replace("%INDICATOR%", grp.getDashboardEntries().get(i).getCodeIndicator()));
-                        return response;
-                    }
-                }
-            }
-
-            //Dashboard entry verif
-            for (DashboardEntry entry : grp.getDashboardEntries()) {
-
-                //Control entry existing in indicator enum
-                if (!DashboardIndicatorEnum.verifyCode(entry.getCodeIndicator())) {
-                    LOG.error("Check dashboard update integrity failed cause invalid indicator " + entry.getCodeIndicator());
-                    response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_CHECKER_FAILED);
-                    response.setDescription(response.getDescription().replace("%CAUSE%", "suspicious indicator %INDICATOR%"));
-                    response.setDescription(response.getDescription().replace("%INDICATOR%", entry.getCodeIndicator()));
-                    return response;
-                }
-
-                //Control entry indicator type and group type is equals 
-                if (!DashboardIndicatorEnum.getTypeByIndicator(entry.getCodeIndicator()).equals(grp.getType())) {
-                    LOG.error("Check dashboard update integrity failed cause inconsistent entry " + entry.getCodeIndicator());
-                    response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_CHECKER_FAILED);
-                    response.setDescription(response.getDescription().replace("%CAUSE%", "inconsistent entry %ENTRY% of type %TYPE% in group %GROUP% of type %GROUPTYPE% "));
-                    response.setDescription(response.getDescription().replace("%ENTRY%", entry.getCodeIndicator()));
-                    response.setDescription(response.getDescription().replace("%TYPE%", DashboardIndicatorEnum.getTypeByIndicator(entry.getCodeIndicator())));
-                    response.setDescription(response.getDescription().replace("%GROUP%", grp.getAssociateElement()));
-                    response.setDescription(response.getDescription().replace("%GROUPTYPE%", grp.getType()));
-                    return response;
-                }
-
-                //Verify if param1 is not null or empty
-                if (StringUtil.isNullOrEmpty(entry.getParam1Val())) {
-                    LOG.error("Check dashboard update integrity failed cause param1 is null or empty for " + entry.getCodeIndicator());
-                    response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_CHECKER_FAILED);
-                    response.setDescription(response.getDescription().replace("%CAUSE%", "Param 1 is null or empty for %INDICATOR% in %GROUP%"));
-                    response.setDescription(response.getDescription().replace("%INDICATOR%", entry.getCodeIndicator()));
-                    response.setDescription(response.getDescription().replace("%GROUP%", grp.getAssociateElement()));
-
-                    return response;
-                }
-
-                //Verify if param2 is not null or empty
-                if (StringUtil.isNullOrEmpty(entry.getParam2Val())) {
-                    LOG.error("Check dashboard update integrity failed cause param2 is null or empty for " + entry.getCodeIndicator());
-                    response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_CHECKER_FAILED);
-                    response.setDescription(response.getDescription().replace("%CAUSE%", "Param 2 is null or empty for %INDICATOR% in %GROUP%"));
-                    response.setDescription(response.getDescription().replace("%INDICATOR%", entry.getCodeIndicator()));
-                    response.setDescription(response.getDescription().replace("%GROUP%", grp.getAssociateElement()));
-
-                    return response;
-                }
-            }
-        }
-        LOG.info("Checker approuved dashboard integrity");
-        return response;
     }
 
     /**
@@ -329,12 +144,7 @@ public class DashboardGroupService implements IDashboardGroupService {
     }
 
     @Override
-    public MessageEventSlimDTO cleanByUser(User user) {
-        return dashboardGroupEntriesDAO.cleanByUser(user);
-    }
-
-    @Override
-    public List<DashboardGroup> readByUser(User user) {
-        return this.dashboardGroupEntriesDAO.readByUser(user);
+    public List<DashboardGroup> readByIdConfig(long idConfig) {
+        return this.dashboardGroupEntriesDAO.readByIdConfig(idConfig);
     }
 }

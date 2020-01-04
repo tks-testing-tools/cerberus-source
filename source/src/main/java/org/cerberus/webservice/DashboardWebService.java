@@ -32,7 +32,7 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cerberus.crud.entity.User;
-import org.cerberus.crud.service.IDashboardGroupService;
+import org.cerberus.crud.service.IDashboardConfigService;
 import org.cerberus.crud.service.IUserService;
 import org.cerberus.dto.DashboardGroupConfigDTO;
 import org.cerberus.dto.DashboardIndicatorConfigDTO;
@@ -55,7 +55,7 @@ public class DashboardWebService {
     private static final Logger LOG = LogManager.getLogger(DashboardWebService.class);
 
     private IUserService userService;
-    private IDashboardGroupService dashboardGroupService;
+    private IDashboardConfigService dashboardConfigService;
 
     /**
      * Read dashboard content and config for user
@@ -69,16 +69,17 @@ public class DashboardWebService {
     @Path("/read")
     public Response readDashboard(@Context ServletContext servletContext, @Context HttpServletRequest request) {
         ApplicationContext appContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-        this.dashboardGroupService = appContext.getBean(IDashboardGroupService.class);
+        this.dashboardConfigService = appContext.getBean(IDashboardConfigService.class);
         this.userService = appContext.getBean(IUserService.class);
         User currentUser = new User();
+        
         if (request.getRemoteUser() != null) {
             try {
                 currentUser = userService.findUserByKey(request.getRemoteUser());
             } catch (Exception exception) {
                 LOG.error("Exception during read user process : ", exception);
             }
-            return Response.ok(dashboardGroupService.readDashboard(currentUser)).status(200)
+            return Response.ok(dashboardConfigService.readDashboard(currentUser,"CURRENT")).status(200)
                     .header("Access-Control-Allow-Origin", "*")
                     .header("Access-Control-Allow-Credentials", "true")
                     .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
@@ -101,12 +102,12 @@ public class DashboardWebService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/update")
-    public Response update(@Context ServletContext servletContext, @Context HttpServletRequest request, String jsonReq) {
+    @Path("/save")
+    public Response save(@Context ServletContext servletContext, @Context HttpServletRequest request, String jsonReq) {
 
         //Load Dashboard and user services from context
         ApplicationContext appContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-        this.dashboardGroupService = appContext.getBean(IDashboardGroupService.class);
+        this.dashboardConfigService = appContext.getBean(IDashboardConfigService.class);
         this.userService = appContext.getBean(IUserService.class);
 
         //Load user
@@ -122,11 +123,15 @@ public class DashboardWebService {
             try {
                 if (!StringUtil.isNullOrEmpty(jsonReq)) {
                     JSONObject jsonConf = new JSONObject(jsonReq);
-                    JSONArray dashboardConf = jsonConf.getJSONArray("DashboardConfig");
-                    List<DashboardTypeConfigDTO> confExtract = this.loadConfFromRequest(dashboardConf);
+                    JSONObject conf = jsonConf.getJSONObject("DashboardConfig");
+                    JSONArray confContent = conf.getJSONArray("Config");
 
+
+                    List<DashboardTypeConfigDTO> confExtract = this.loadConfFromRequest(confContent);
+                    String title = conf.getString("TitleConfig");
+                    LOG.debug("Title : " + title);
                     //Response to user : event list from update dashboard process
-                    return Response.ok(this.dashboardGroupService.updateDashboard(confExtract, currentUser)).status(200)
+                    return Response.ok(this.dashboardConfigService.saveConfig(confExtract, title, currentUser, currentUser)).status(200)
                             .header("Access-Control-Allow-Origin", "*")
                             .header("Access-Control-Allow-Credentials", "true")
                             .build();

@@ -58,7 +58,7 @@ public class DashboardEntryDAO implements IDashboardEntryDAO {
         try {
             Connection connection = databaseSpring.connect();
             PreparedStatement preStat = connection.prepareStatement(query.toString());
-            preStat.setInt(1, dashboardgroup.getId());
+            preStat.setLong(1, dashboardgroup.getId());
             ResultSet rs = preStat.executeQuery();
             while (rs.next()) {
                 response.add(this.loadFromResultSet(rs));

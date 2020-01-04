@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Service use to search data for dashboard indicator.
+ *
  * @author CorentinDelage
  */
 @Service
@@ -56,24 +57,45 @@ public class DashboardEntryDataService implements IDashboardEntryDataService {
             switch (dashboardEntry.getCodeIndicator()) {
                 case "CAMPAIGN_EVOLUTION":
 
-                    Integer yLadder = 10;
+                    //Read raw data
+                    dashboardEntryData = dashboardCampaignEvolutionDAO.readDataForDashboardEntry(dashboardEntry);
 
+                    //Calcul initial nb of data entry
+                    long nbEntry = DashboardUtil.computeNbEntry(dashboardEntryData, 2);
+                    
+                    //Calcul param 3 or set 10 value by default
+                    Integer xScale = 10;
                     if (!dashboardEntry.getParam3Val().equals("DEFAULT")) {
                         try {
-                            yLadder = Integer.valueOf(dashboardEntry.getParam3Val());
-                            LOG.debug("Y LADDER : "+ yLadder);
+                            xScale = Integer.valueOf(dashboardEntry.getParam3Val());
                         } catch (NumberFormatException exception) {
                             LOG.error("Invalid param ladder for campaign evolution indicator, it will be compute for 10 values by default. Exception : ", exception);
                         }
                     }
+
+                    //Reduce value to x scale values
+                    dashboardEntryData = DashboardUtil.reduceMapForChart(dashboardEntryData, xScale, 2);
+
+                    LOG.debug(dashboardEntryData.size());
+                    //Compute advancement
+                    dashboardEntryData = DashboardUtil.computeAdvancement(dashboardEntryData, 2, 1);
+
+                    //Calcul scale, median and final tag, values must be added after all map manipulation to don't corrupt data
+                    long y_scale = DashboardUtil.generateScale(dashboardEntryData, 2, 1, 1.25);
+                    long median = DashboardUtil.computeMedian(dashboardEntryData, 2, 1);
+                    long x_scale = DashboardUtil.computeNbEntry(dashboardEntryData, 2);
                     
-                    dashboardEntryData = dashboardCampaignEvolutionDAO.readDataForDashboardEntry(dashboardEntry);
-                    long nbEntry = DashboardUtil.computeNbOfEntry(dashboardEntryData, 2);
-                    dashboardEntryData = DashboardUtil.reduceMapForChart(dashboardEntryData, yLadder, false, false, false);
-                    dashboardEntryData = DashboardUtil.computeAdvancement(dashboardEntryData, 2);
-                    dashboardEntryData.put("Y_LADDER", DashboardUtil.generateLadder(dashboardEntryData, 2, 1, 1.25));
-                    dashboardEntryData.put("INITIAL_TOTAL_TAG",nbEntry);
-                    dashboardEntryData.put("FINAL_TOTAL_TAG", DashboardUtil.computeNbOfEntry(dashboardEntryData, 2));
+                    //Add scale
+                    dashboardEntryData.put("SCALE_Y", y_scale);
+                    
+                    //Add actuel nb of entry data
+                    dashboardEntryData.put("FINAL_TOTAL_TAG", x_scale);
+
+                    //Add median of entry
+                    dashboardEntryData.put("MEDIAN", median);
+
+                    dashboardEntryData.put("INITIAL_TOTAL_TAG", nbEntry);
+
                     break;
                 case "CAMPAIGN_LAST_EXE_DETAIL":
                     dashboardEntryData = dashboardCampainLastReportByStatusDAO.readDataForDashboardEntry(dashboardEntry);

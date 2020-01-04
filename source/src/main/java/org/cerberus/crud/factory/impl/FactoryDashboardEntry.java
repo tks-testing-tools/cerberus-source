@@ -37,7 +37,6 @@ public class FactoryDashboardEntry implements IFactoryDashboardEntry {
     public DashboardEntry create(@Nullable Integer idGroup, String codeIndicator, String paramFirst, String paramSecond, String paramThird, String paramFourth, String associateElement) {
         DashboardEntry dashboardEntry = new DashboardEntry();
         
-        LOG.debug(paramThird);
         if (idGroup != null) {
             dashboardEntry.setIdGroup(idGroup);
         }

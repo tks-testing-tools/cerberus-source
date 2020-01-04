@@ -30,12 +30,10 @@ import org.cerberus.dto.MessageEventSlimDTO;
  */
 public interface IDashboardGroupDAO {
 
-    public List<DashboardGroup> readByUser(User user);
+    public List<DashboardGroup> readByIdConfig(long idConfig);
 
-    public DashboardGroup loadFromResultSet(ResultSet rs, User user) throws SQLException;
+    public DashboardGroup loadFromResultSet(ResultSet rs) throws SQLException;
 
     public Integer create(DashboardGroup dashboardGroup);
-
-    public MessageEventSlimDTO cleanByUser(User user);
 
 }
