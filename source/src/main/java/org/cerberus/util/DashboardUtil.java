@@ -38,7 +38,7 @@ import org.apache.logging.log4j.Logger;
  * @author cDelage
  */
 public class DashboardUtil {
-    
+
     private static final Logger LOG = LogManager.getLogger(DashboardUtil.class);
 
     /**
@@ -54,18 +54,18 @@ public class DashboardUtil {
      */
     public static Map<String, Object> reduceMapForChart(Map<String, Object> initMap, Integer nbValueReturned, Integer nbLineIndexed) {
         Map<String, Object> response = new HashMap();
-        
+
         if (initMap.size() > nbValueReturned && nbValueReturned > 1) {
-            
+
             try {
                 //Compute real size (including 0 and divise for KEY / VALUE)
                 double initialSize = DashboardUtil.computeSize(initMap, nbLineIndexed);
-                
+
                 Integer quantileValue = nbValueReturned - 1;
 
                 //Search x = n/q-1 to compute an regular interval index.
                 Double indexQuantile = new Double(initialSize / (quantileValue));
-                
+
                 for (int i = 0; i < nbValueReturned; i++) {
                     //Calcul x_quantile * index of line
                     Double specificQuantile = new Double(indexQuantile * i);
@@ -100,7 +100,7 @@ public class DashboardUtil {
             } finally {
                 return response;
             }
-            
+
         }
         return initMap;
     }
@@ -113,25 +113,24 @@ public class DashboardUtil {
      * @param nbLineIndexed
      * @return
      */
-    public static Map<String, Object> computeAdvancement(Map<String, Object> initMap, Integer nbLineIndexed, Integer targetLine) {
-        //Map<String, Object> response = new HashMap();
+    public static Map<String, Object> computeAdvancement(Map<String, Object> initMap, Integer nbLineIndexed, Integer computeLine) {
         if (initMap.size() > nbLineIndexed) {
             Integer size = DashboardUtil.computeSize(initMap, nbLineIndexed);
             for (int i = 0; i <= size; i++) {
                 if (i != 0) {
                     //Parse current number of execution in map index i
-                    Long nbExe = DashboardUtil.getLongEntryValue(initMap, targetLine, i);
-
+                    Long nbExe = DashboardUtil.getLongEntryValue(initMap, computeLine, i);
+                    LOG.debug("nbExe : " + nbExe);
                     //Get last number of execution in map index i
-                    Long nbLastExe = DashboardUtil.getLongEntryValue(initMap, targetLine, (i - 1));
-                    
+                    Long nbLastExe = DashboardUtil.getLongEntryValue(initMap, computeLine, (i - 1));
+                    LOG.debug("nbLastExe : " + nbLastExe);
                     //Compute advancement
                     Long advancement = nbExe - nbLastExe;
-
+                    LOG.debug("Advancement : " + advancement);
                     //Set values to response
-                    initMap.put("VALUE_" + targetLine + "_" + i, advancement);
+                    initMap.put("VALUE_" + nbLineIndexed + "_" + i, advancement);
                 } else {
-                    initMap.put("VALUE_" + targetLine + "_0", DashboardUtil.getLongEntryValue(initMap, targetLine, 0));
+                    initMap.put("VALUE_" + nbLineIndexed + "_0", DashboardUtil.getLongEntryValue(initMap, computeLine, 0));
                 }
             }
         }
@@ -188,7 +187,7 @@ public class DashboardUtil {
         int size = DashboardUtil.computeSize(initMap, nbLineIndexed);
         long storeValue = 0;
         long response = 0;
-        
+
         for (int i = 0; i < size; i++) {
             try {
                 Long value = DashboardUtil.getLongEntryValue(initMap, targetLine, i);
@@ -215,19 +214,42 @@ public class DashboardUtil {
         try {
             int sizeLoop = DashboardUtil.computeSize(initMap, nbLineIndexed);
             List<Long> values = new ArrayList();
-            
+
             for (int i = 1; i <= sizeLoop; i++) {
                 values.add(DashboardUtil.getLongEntryValue(initMap, targetLine, i));
             }
             Collections.sort(values);
             int medianIndex = values.size() / 2;
             response = values.get(medianIndex);
-            
+
         } catch (Exception exception) {
             LOG.error("Error during median computing, catch exception : ", exception);
         }
-        
+
         return response;
+    }
+
+    /**
+     * Rename key value of map line indexed.
+     *
+     * @param initMap
+     * @param nbLineIndexed
+     * @param targetLine
+     * @param keyName
+     * @param type [string, long]
+     * @return
+     */
+    public static Map<String, Object> renameValueKey(Map<String, Object> initMap, Integer nbLineIndexed, Integer targetLine, String keyName, String type) {
+        Integer mapSize = DashboardUtil.computeSize(initMap, nbLineIndexed);
+        for (int i = 0; i <= mapSize; i++) {
+            if (type.equals("long")) {
+                initMap.put(keyName + "_" + i, DashboardUtil.getLongEntryValue(initMap, targetLine, i));
+            } else {
+                initMap.put(keyName + "_" + i, DashboardUtil.getStringEntryValue(initMap, targetLine, i));
+            }
+            initMap.remove("VALUE_" + targetLine + "_" + i);
+        }
+        return initMap;
     }
 
     /**
@@ -306,7 +328,7 @@ public class DashboardUtil {
         }
         return initMap;
     }
-    
+
     public static Map<String, Object> convertLineToLong(Map<String, Object> initMap, int nbLineIndexed, int targetLine) {
         Integer index = DashboardUtil.computeSize(initMap, nbLineIndexed);
         for (int i = 0; i <= index; i++) {

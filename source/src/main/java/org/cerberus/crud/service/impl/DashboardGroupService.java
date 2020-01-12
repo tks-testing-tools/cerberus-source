@@ -25,7 +25,6 @@ import org.cerberus.crud.dao.IDashboardGroupDAO;
 import org.cerberus.crud.entity.DashboardConfig;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroup;
-import org.cerberus.crud.service.IDashboardConfigService;
 import org.cerberus.crud.service.IDashboardEntryService;
 import org.cerberus.crud.service.IDashboardGroupService;
 import org.cerberus.dto.DashboardEntryDTO;

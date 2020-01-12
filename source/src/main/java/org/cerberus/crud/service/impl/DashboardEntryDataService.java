@@ -50,10 +50,10 @@ public class DashboardEntryDataService implements IDashboardEntryDataService {
 
     @Autowired
     private DashboardAppStatusDAO dashboardAppStatusDAO;
-    
+
     @Autowired
     private DashboardCampReportStatusDAO dashboardCampReportStatusDAO;
-    
+
     @Autowired
     private DashboardCampExeFreqDAO dashboardCampExeFreqDAO;
 
@@ -77,9 +77,11 @@ public class DashboardEntryDataService implements IDashboardEntryDataService {
 
                     //Calcul param 3 or set 10 value by default
                     Integer xScale = 10;
+                    LOG.debug(xScale);
                     if (!dashboardEntry.getParam3Val().equals("DEFAULT")) {
                         try {
                             xScale = Integer.valueOf(dashboardEntry.getParam3Val());
+                            LOG.debug("XSCALE : " + xScale);
                         } catch (NumberFormatException exception) {
                             LOG.error("Invalid param ladder for campaign evolution indicator, it will be compute for 10 values by default. Exception : ", exception);
                         }
@@ -88,19 +90,20 @@ public class DashboardEntryDataService implements IDashboardEntryDataService {
                     //Reduce value to x scale values
                     dashboardEntryData = DashboardUtil.reduceMapForChart(dashboardEntryData, xScale, 2);
 
-                    //Copy Value_1 , Paste Value_2 to use in advancement
-                    dashboardEntryData = DashboardUtil.duplicateLine(dashboardEntryData, 2, 1, "long");
-                    
-                    //Convert Line 2 from string to long
+                    //Compute advancement of line 2 on line 3 
+                    dashboardEntryData = DashboardUtil.computeAdvancement(dashboardEntryData, 2, 1);
+
+                    //Convert string line to integer
                     dashboardEntryData = DashboardUtil.convertLineToLong(dashboardEntryData, 3, 1);
-                    
-                    //Compute advancement
-                    dashboardEntryData = DashboardUtil.computeAdvancement(dashboardEntryData, 3, 2);
 
                     //Calcul scale, median and final tag, values must be added after all map manipulation to don't corrupt data
                     long y_scale = DashboardUtil.generateScale(dashboardEntryData, 3, 1, 1.25);
                     long median = DashboardUtil.computeMedian(dashboardEntryData, 3, 2);
                     long x_scale = DashboardUtil.computeNbEntry(dashboardEntryData, 3);
+
+                    //Convert keys for better readability
+                    dashboardEntryData = DashboardUtil.renameValueKey(dashboardEntryData, 3, 1, "NBEXE", "long");
+                    dashboardEntryData = DashboardUtil.renameValueKey(dashboardEntryData, 3, 2, "ADVANCEMENT", "long");
 
                     //Add scale
                     dashboardEntryData.put("SCALE_Y", y_scale);
