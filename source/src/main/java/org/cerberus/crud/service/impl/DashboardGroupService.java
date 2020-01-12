@@ -18,31 +18,20 @@
 package org.cerberus.crud.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cerberus.crud.dao.IDashboardGroupDAO;
-import org.cerberus.crud.entity.Campaign;
 import org.cerberus.crud.entity.DashboardConfig;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.entity.DashboardGroup;
-import org.cerberus.crud.entity.User;
-import org.cerberus.crud.service.IApplicationService;
-import org.cerberus.crud.service.ICampaignService;
 import org.cerberus.crud.service.IDashboardConfigService;
 import org.cerberus.crud.service.IDashboardEntryService;
 import org.cerberus.crud.service.IDashboardGroupService;
 import org.cerberus.dto.DashboardEntryDTO;
 import org.cerberus.dto.DashboardGroupDTO;
-import org.cerberus.dto.DashboardTypeConfigDTO;
 import org.cerberus.dto.MessageEventSlimDTO;
-import org.cerberus.enums.DashboardIndicatorEnum;
-import org.cerberus.enums.DashboardTypeIndicatorEnum;
 import org.cerberus.enums.MessageEventEnum;
-import org.cerberus.util.StringUtil;
-import org.cerberus.util.answer.AnswerItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -60,9 +49,6 @@ public class DashboardGroupService implements IDashboardGroupService {
 
     @Autowired
     private IDashboardEntryService dashboardEntryService;
-
-    @Autowired
-    private IDashboardConfigService dashboardConfigService;
 
     /**
      * Read dashboard statement and content for user
@@ -135,7 +121,8 @@ public class DashboardGroupService implements IDashboardGroupService {
     public DashboardGroupDTO dashboardGroupToDTO(DashboardGroup dashboardGroupEntries) {
         List<DashboardEntryDTO> dashboardEntries = this.dashboardEntryService.convertEntryListToDTO(dashboardGroupEntries.getDashboardEntries());
         String associateElement = dashboardGroupEntries.getAssociateElement();
-        return new DashboardGroupDTO(dashboardEntries, associateElement);
+        String type = dashboardGroupEntries.getType();
+        return new DashboardGroupDTO(dashboardEntries, associateElement, type);
     }
 
     @Override

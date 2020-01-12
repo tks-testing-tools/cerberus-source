@@ -22,17 +22,23 @@ import java.util.List;
 import org.cerberus.dto.DashboardIndicatorConfigDTO;
 
 /**
- * Enum to store dashboard indicator. 
- * Used in Dashboard configuration.
+ * Enum to store dashboard indicator. Used in Dashboard configuration.
+ *
  * @author cDelage
  */
 public enum DashboardIndicatorEnum {
 
     // Store code indicator, title, params and type. For params set DISABLE to title to if necessary.
+// Store code indicator, title, params and type. For params set DISABLE to title to if necessary.
+// Store code indicator, title, params and type. For params set DISABLE to title to if necessary.
+// Store code indicator, title, params and type. For params set DISABLE to title to if necessary.
     NOT_VALID("NOT_VALID", "Not valid report item", "DISABLE", "", "DISABLE", "", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.NOT_VALID),
-    CAMPAIGN_EVOLUTION("CAMPAIGN_EVOLUTION", "Campaign evolution", "Start date", "DATE", "End date", "DATE", "Number of entry [2,10]", "Number", "DISABLE", "", DashboardTypeIndicatorEnum.CAMPAIGN),
-    CAMPAIGN_LAST_REPORT("CAMPAIGN_LAST_EXE_DETAIL", "Last execution detail", "DISABLE", "", "DISABLE", "","DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.CAMPAIGN);
-
+    CAMP_EVOLUTION("CAMP_EVOLUTION", "Campaign evolution", "Start date", "DATE", "End date", "DATE", "Number of entry [2,10]", "Number", "DISABLE", "", DashboardTypeIndicatorEnum.CAMPAIGN),
+    CAMP_LAST_DETAIL("CAMP_LAST_EXE_DETAIL", "Last execution detail", "DISABLE", "", "DISABLE", "", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.CAMPAIGN),
+    CAMP_TEN_EXE_STATUS("CAMP_TEN_EXE_STATUS", "Ten last execution status", "DISABLE", "", "DISABLE", "", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.CAMPAIGN),
+    CAMP_LAST_EXE_STATUS("CAMP_LAST_EXE_STATUS", "Last execution status", "DISABLE", "", "DISABLE", "", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.CAMPAIGN),
+    CAMP_EXE_FREQ("CAMP_EXE_FREQ", "Execution frequency", "Frequency", "SELECT_FREQUENCY", "Start date", "DATE", "End date", "DATE", "DISABLE", "", DashboardTypeIndicatorEnum.CAMPAIGN),
+    APP_TC_STATUS("APP_TC_STATUS", "Number of testcases by status", "DISABLE", "", "DISABLE", "", "DISABLE", "", "DISABLE", "", DashboardTypeIndicatorEnum.APPLICATION);
 
     private String codeIndicator;
     private String titleIndicator;
@@ -92,7 +98,7 @@ public enum DashboardIndicatorEnum {
 
     public static String getTitleByCodeIndicator(String codeIndicator) {
         for (DashboardIndicatorEnum it : values()) {
-            if(it.getCodeIndicator().equals(codeIndicator)){
+            if (it.getCodeIndicator().equals(codeIndicator)) {
                 return it.getTitleIndicator();
             }
         }

@@ -31,11 +31,13 @@ public class DashboardGroupDTO implements Serializable{
     private  static  final  long serialVersionUID =  1350092881346723535L;
     
     private String associateElement;
+    private String type;
     private List<DashboardEntryDTO> dashboardEntries;
 
-    public DashboardGroupDTO(List<DashboardEntryDTO> dashboardEntries, String associateElement) {
+    public DashboardGroupDTO(List<DashboardEntryDTO> dashboardEntries, String associateElement, String type) {
         this.dashboardEntries = dashboardEntries;
         this.associateElement = associateElement;
+        this.type = type;
     }
 
     public List<DashboardEntryDTO> getDashboardEntries() {
@@ -52,5 +54,13 @@ public class DashboardGroupDTO implements Serializable{
 
     public void setAssociateElement(String associateElement) {
         this.associateElement = associateElement;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

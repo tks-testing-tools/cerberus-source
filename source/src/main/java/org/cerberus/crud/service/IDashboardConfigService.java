@@ -30,28 +30,31 @@ import org.cerberus.dto.MessageEventSlimDTO;
 
 /**
  *
- * @author utilisateur
+ * @author cDelage
  */
 public interface IDashboardConfigService {
 
-    public Map<String, Object> readStatement(DashboardConfig conf);
+    public List<DashboardTypeConfigDTO> readStatement(DashboardConfig conf);
 
     public DashboardGroup dashboardGroupFromConfigDTO(DashboardGroupConfigDTO dashboardGroupConfigDTO, long idConfig);
 
     public List<DashboardEntry> convertEntryFromConfigDTO(List<DashboardIndicatorConfigDTO> dashboardIndicator);
-    
+
     public long create(DashboardConfig conf, User user);
-    
-    public List<DashboardConfig> readConfigForUser(User user);
-    
+
+    public List<DashboardConfig> readAllConfigsForUser(User user);
+
     public DashboardConfig read(String title, User user);
-    
-    public MessageEventSlimDTO delete(String title);
-    
+
+    public MessageEventSlimDTO delete(String title, User user);
+
     public Map<String, Object> readDashboard(User user, String title);
-    
+
     public MessageEventSlimDTO checkDashboardIntegrity(List<DashboardGroup> listGroup);
-    
+
     public List<MessageEventSlimDTO> saveConfig(List<DashboardTypeConfigDTO> dashboardGroupDTO, String titleConfig, User user, User usrCreated);
-    
+
+    public boolean isExistingConfig(String title, User user);
+
+    public List<MessageEventSlimDTO> switchConfig(String title, User user);
 }

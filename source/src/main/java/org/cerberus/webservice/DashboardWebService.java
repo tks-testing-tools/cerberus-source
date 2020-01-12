@@ -26,6 +26,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -37,6 +38,8 @@ import org.cerberus.crud.service.IUserService;
 import org.cerberus.dto.DashboardGroupConfigDTO;
 import org.cerberus.dto.DashboardIndicatorConfigDTO;
 import org.cerberus.dto.DashboardTypeConfigDTO;
+import org.cerberus.dto.MessageEventSlimDTO;
+import org.cerberus.enums.MessageEventEnum;
 import org.cerberus.util.StringUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,20 +75,22 @@ public class DashboardWebService {
         this.dashboardConfigService = appContext.getBean(IDashboardConfigService.class);
         this.userService = appContext.getBean(IUserService.class);
         User currentUser = new User();
-        
+
         if (request.getRemoteUser() != null) {
             try {
                 currentUser = userService.findUserByKey(request.getRemoteUser());
             } catch (Exception exception) {
                 LOG.error("Exception during read user process : ", exception);
             }
-            return Response.ok(dashboardConfigService.readDashboard(currentUser,"CURRENT")).status(200)
+            return Response.ok(dashboardConfigService.readDashboard(currentUser, "CURRENT")).status(200)
                     .header("Access-Control-Allow-Origin", "*")
                     .header("Access-Control-Allow-Credentials", "true")
                     .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
                     .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD").build();
         }
-        return Response.ok("User exception, please contact your administrator").status(400)
+        MessageEventSlimDTO msg = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_WEBSERVICE_ERROR);
+        msg.setDescription(msg.getDescription().replace("%TARGET%", "read dashboard").replace("%CAUSE%", "user not found"));
+        return Response.ok(msg).status(400)
                 .header("Access-Control-Allow-Origin", "*")
                 .header("Access-Control-Allow-Credentials", "true")
                 .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
@@ -126,7 +131,6 @@ public class DashboardWebService {
                     JSONObject conf = jsonConf.getJSONObject("DashboardConfig");
                     JSONArray confContent = conf.getJSONArray("Config");
 
-
                     List<DashboardTypeConfigDTO> confExtract = this.loadConfFromRequest(confContent);
                     String title = conf.getString("TitleConfig");
                     LOG.debug("Title : " + title);
@@ -139,13 +143,104 @@ public class DashboardWebService {
 
             } catch (JSONException exception) {
                 LOG.error("Catch exception during json reading ", exception);
-                return Response.ok("CATCH JSON EXCEPTION : " + exception.getLocalizedMessage()).status(401)
+                MessageEventSlimDTO msg = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_WEBSERVICE_ERROR);
+                msg.setDescription(msg.getDescription().replace("%TARGET%", "save config").replace("%CAUSE%", "bad json format"));
+                return Response.ok(msg).status(401)
                         .header("Access-Control-Allow-Origin", "*")
                         .header("Access-Control-Allow-Credentials", "true")
                         .build();
             }
         }
-        return Response.ok("Fail to update dashboard, please contact your administrator").status(400)
+        MessageEventSlimDTO msg = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_WEBSERVICE_ERROR);
+        msg.setDescription(msg.getDescription().replace("%TARGET%", "save config").replace("%CAUSE%", "user not found"));
+        return Response.ok(msg).status(400)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Credentials", "true")
+                .build();
+    }
+
+    /**
+     * Switch config CURRENT to saved config for user.
+     *
+     * @param titleConf
+     * @param servletContext
+     * @param request
+     * @return
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/switch")
+    public Response switchDashboard(@QueryParam("config") String titleConf, @Context ServletContext servletContext, @Context HttpServletRequest request) {
+
+        //Get services from context
+        ApplicationContext appContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+        this.dashboardConfigService = appContext.getBean(IDashboardConfigService.class);
+        this.userService = appContext.getBean(IUserService.class);
+
+        //Load user
+        User currentUser = new User();
+        if (request.getRemoteUser() != null) {
+            try {
+                currentUser = userService.findUserByKey(request.getRemoteUser());
+            } catch (Exception exception) {
+                LOG.error("Exception during read user process : ", exception);
+            }
+
+            if (!StringUtil.isNullOrEmpty(titleConf)) {
+                List<MessageEventSlimDTO> switchResult = dashboardConfigService.switchConfig(titleConf, currentUser);
+                return Response.ok(switchResult).status(200)
+                        .header("Access-Control-Allow-Origin", "*")
+                        .header("Access-Control-Allow-Credentials", "true")
+                        .build();
+            }
+
+        }
+        MessageEventSlimDTO msg = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_WEBSERVICE_ERROR);
+        msg.setDescription(msg.getDescription().replace("%TARGET%", "switch config").replace("%CAUSE%", "user not found"));
+        return Response.ok(msg).status(400)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Credentials", "true")
+                .build();
+    }
+
+    /**
+     * Switch config CURRENT to saved config for user.
+     *
+     * @param titleConf
+     * @param servletContext
+     * @param request
+     * @return
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/clean")
+    public Response cleanConfig(@QueryParam("config") String titleConf, @Context ServletContext servletContext, @Context HttpServletRequest request) {
+
+        //Get services from context
+        ApplicationContext appContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+        this.dashboardConfigService = appContext.getBean(IDashboardConfigService.class);
+        this.userService = appContext.getBean(IUserService.class);
+
+        //Load user
+        User currentUser = new User();
+        if (request.getRemoteUser() != null) {
+            try {
+                currentUser = userService.findUserByKey(request.getRemoteUser());
+            } catch (Exception exception) {
+                LOG.error("Exception during read user process : ", exception);
+            }
+
+            if (!StringUtil.isNullOrEmpty(titleConf)) {
+                return Response.ok(dashboardConfigService.delete(titleConf, currentUser)).status(200)
+                        .header("Access-Control-Allow-Origin", "*")
+                        .header("Access-Control-Allow-Credentials", "true")
+                        .build();
+            }
+
+        }
+        MessageEventSlimDTO msg = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_WEBSERVICE_ERROR);
+        msg.setDescription(msg.getDescription().replace("%TARGET%", "clean config").replace("%CAUSE%", "user not found"));
+        return Response.ok(msg).status(400)
                 .header("Access-Control-Allow-Origin", "*")
                 .header("Access-Control-Allow-Credentials", "true")
                 .build();

@@ -52,6 +52,13 @@ public class DashboardConfigDAO implements IDashboardConfigDAO {
 
     private static final Logger LOG = LogManager.getLogger(DashboardConfigService.class);
 
+    /**
+     * Create new config.
+     * 
+     * @param conf
+     * @param userCreated
+     * @return 
+     */
     @Override
     public long create(DashboardConfig conf, User userCreated) {
         long response = 0;
@@ -77,15 +84,21 @@ public class DashboardConfigDAO implements IDashboardConfigDAO {
         return response;
     }
 
+    /**
+     * Delete a config.
+     * @param title
+     * @return 
+     */
     @Override
-    public MessageEventSlimDTO delete(String title) {
+    public MessageEventSlimDTO delete(String title, User user) {
         MessageEventSlimDTO response = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_DELETE_CONFIG_SUCCESS);
-        String query = "DELETE FROM `dashboardconfig` WHERE `title`= ?;";
+        String query = "DELETE FROM `dashboardconfig` WHERE `title`= ? AND `usr_id`= ?;";
         try {
             Connection connection = databaseSpring.connect();
             PreparedStatement preStat = connection.prepareStatement(query);
             int i = 1;
             preStat.setString(i++, title);
+            preStat.setInt(i++, user.getUserID());
             preStat.executeUpdate();
         } catch (SQLException exception) {
             LOG.error("Unable to delete dashboardconfig, catch exception : ", exception);
@@ -94,6 +107,12 @@ public class DashboardConfigDAO implements IDashboardConfigDAO {
         return response;
     }
 
+    /**
+     * Read a config by title and user.
+     * @param title
+     * @param user
+     * @return 
+     */
     @Override
     public DashboardConfig read(String title, User user) {
         String query = "SELECT `id_config` FROM `dashboardconfig` WHERE `usr_id` = ? AND `title` = ?;";
@@ -118,8 +137,13 @@ public class DashboardConfigDAO implements IDashboardConfigDAO {
         return conf;
     }
 
+    /**
+     * Read all existing config for user.
+     * @param user
+     * @return 
+     */
     @Override
-    public List<DashboardConfig> readConfigForUser(User user) {
+    public List<DashboardConfig> readAllConfigsForUser(User user) {
         String query = "SELECT `id_config`,`title` FROM `dashboardconfig` WHERE `usr_id` = ?;";
         List<DashboardConfig> response = new ArrayList();
 
@@ -138,6 +162,12 @@ public class DashboardConfigDAO implements IDashboardConfigDAO {
         return response;
     }
 
+    /**
+     * Load config from resultset.
+     * @param rs
+     * @param user
+     * @return 
+     */
     @Override
     public DashboardConfig loadFromResultSet(ResultSet rs, User user) {
         DashboardConfig conf = new DashboardConfig();
@@ -149,5 +179,33 @@ public class DashboardConfigDAO implements IDashboardConfigDAO {
             LOG.error("Error during read config, catch exception : ", exception);
         }
         return conf;
+    }
+
+    /**
+     * Is existing config.
+     * @param title
+     * @param user
+     * @return 
+     */
+    @Override
+    public boolean isExistingConfig(String title, User user) {
+        String query = "SELECT `id_config` FROM `dashboardconfig` WHERE `usr_id` = ? AND title = ?;";
+        boolean response = false;
+        try {
+            Connection connection = databaseSpring.connect();
+            PreparedStatement preStat = connection.prepareStatement(query);
+
+            int i = 1;
+            preStat.setInt(i++, user.getUserID());
+            preStat.setString(i++, title);
+            ResultSet rs = preStat.executeQuery();
+
+            if (rs.first()) {
+                response = true;
+            }
+        } catch (SQLException exception) {
+            LOG.error("Error during check if config existing, catch exception : ", exception);
+        }
+        return response;
     }
 }

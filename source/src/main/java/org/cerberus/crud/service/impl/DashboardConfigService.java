@@ -34,6 +34,7 @@ import org.cerberus.crud.factory.IFactoryDashboardConfig;
 import org.cerberus.crud.factory.IFactoryDashboardEntry;
 import org.cerberus.crud.factory.IFactoryDashboardGroup;
 import org.cerberus.crud.service.IApplicationService;
+import org.cerberus.crud.service.ICampaignGroupService;
 import org.cerberus.crud.service.ICampaignService;
 import org.cerberus.crud.service.IDashboardConfigService;
 import org.cerberus.crud.service.IDashboardGroupService;
@@ -79,6 +80,9 @@ public class DashboardConfigService implements IDashboardConfigService {
     @Autowired
     private IDashboardConfigDAO dashboardConfigDAO;
 
+    @Autowired
+    private ICampaignGroupService campaignGroupService;
+
     private static final Logger LOG = LogManager.getLogger(DashboardConfigService.class);
 
     @Override
@@ -109,7 +113,10 @@ public class DashboardConfigService implements IDashboardConfigService {
             }
 
             //Add Dashboard config statement (All type/group/entry active for config)
-            Map<String, Object> dashboardStatement = readStatement(conf);
+            Map<String, Object> dashboardStatement = new HashMap();
+            dashboardStatement.put("Config", readStatement(conf));
+            dashboardStatement.put("TitleConfig", title);
+            dashboardStatement.put("SavedConfig", availableConfig);
             response.put("DashboardConfig", dashboardStatement);
 
             if (dashboardStatement.isEmpty()) {
@@ -118,19 +125,18 @@ public class DashboardConfigService implements IDashboardConfigService {
                 msgList.add(new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_READ_AVAILABILITY_SUCCESS));
             }
 
-            configList = readConfigForUser(user);
+            configList = readAllConfigsForUser(user);
             for (DashboardConfig it : configList) {
                 availableConfig.add(it.getTitle());
             }
-            
-            if(availableConfig.size() > 0){
+
+            if (availableConfig.size() > 0) {
                 msgList.add(new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_READ_SAVED_CONFIG_SUCCESS));
-            }else{
+            } else {
                 msgList.add(new MessageEventSlimDTO((MessageEventEnum.DASHBOARD_READ_SAVED_CONFIG_EMPTY)));
             }
 
-            response.put("SavedConfig", availableConfig);
-            response.put("MessageEventList", msgList);
+            response.put("MessageEvent", msgList);
             response.put("DashboardContent", contentDTO);
 
         } catch (Exception exception) {
@@ -161,7 +167,9 @@ public class DashboardConfigService implements IDashboardConfigService {
             //Convert conf object to groups and entries
             for (DashboardTypeConfigDTO type : dashboardTypeDTO) {
                 for (DashboardGroupConfigDTO grp : type.getGroupList()) {
-                    dashboardGroup.add(dashboardGroupFromConfigDTO(grp, conf.getIdConfig()));
+                    if (grp.isIsActive()) {
+                        dashboardGroup.add(dashboardGroupFromConfigDTO(grp, conf.getIdConfig()));
+                    }
                 }
             }
 
@@ -174,7 +182,7 @@ public class DashboardConfigService implements IDashboardConfigService {
             if (msg.getCode() == 200) {
 
                 //Delete config with same name
-                msg = delete(titleConfig);
+                msg = delete(titleConfig, user);
                 response.add(msg);
 
                 //If delete is success
@@ -186,11 +194,11 @@ public class DashboardConfigService implements IDashboardConfigService {
                     response.addAll(this.dashboardGroupService.saveGroupList(conf));
                 } else {
                     LOG.error("Error during delete, message : ", msg.getDescription());
-                    delete(titleConfig);
+                    delete(titleConfig, user);
                 }
 
             } else if (msg.getCode() == 300) {
-                msg = delete(titleConfig);
+                msg = delete(titleConfig, user);
                 msg.setDescription(msg.getDescription().replace("%CONFIG%", titleConfig));
                 response.add(msg);
             } else {
@@ -203,6 +211,48 @@ public class DashboardConfigService implements IDashboardConfigService {
     }
 
     /**
+     * Switch current config to saved config for user.
+     *
+     * @param title
+     * @param user
+     * @return
+     */
+    @Override
+    public List<MessageEventSlimDTO> switchConfig(String title, User user) {
+        List<MessageEventSlimDTO> response = new ArrayList();
+        LOG.debug("Switch config launched");
+        try {
+            if (isExistingConfig(title, user)) {
+                LOG.debug("Config exist");
+                //Read conf object
+                DashboardConfig newConf = read(title, user);
+
+                //Set group content to conf
+                newConf.setGroupList(dashboardGroupService.readByIdConfig(newConf.getIdConfig()));
+
+                //Read statement config
+                List<DashboardTypeConfigDTO> newConfigStatement = readStatement(newConf);
+
+                //Save new current conf
+                response.addAll(saveConfig(newConfigStatement, "CURRENT", user, user));
+                LOG.debug("End if exist");
+            } else {
+                MessageEventSlimDTO msg = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_NOT_EXISTING_CONFIG);
+                msg.setDescription(msg.getDescription().replace("%CONFIG%", title));
+                response.add(msg);
+                LOG.error("Failed to switch config cause config not existing");
+            }
+        } catch (Exception exception) {
+            LOG.error("Exception during switch Dashboard config : ", exception);
+            MessageEventSlimDTO msg = new MessageEventSlimDTO(MessageEventEnum.DASHBOARD_SWITCH_CONFIG_FAILED);
+            msg.setDescription(msg.getDescription().replace("%CAUSE%", exception.getLocalizedMessage()));
+            response.add(msg);
+        }
+
+        return response;
+    }
+
+    /**
      * Read statement of Dashboard with available and active TYPE / GROUP /
      * INDICATOR for config.
      *
@@ -210,24 +260,24 @@ public class DashboardConfigService implements IDashboardConfigService {
      * @return
      */
     @Override
-    public Map<String, Object> readStatement(DashboardConfig conf) {
+    public List<DashboardTypeConfigDTO> readStatement(DashboardConfig conf) {
 
-        Map<String, Object> response = new HashMap();
+        List<DashboardTypeConfigDTO> typeList = DashboardTypeIndicatorEnum.getTypeList();
 
         try {
-            List<DashboardTypeConfigDTO> typeList = DashboardTypeIndicatorEnum.getTypeList();
 
             // For each type set groups available and associate indicator available to group
             for (DashboardTypeConfigDTO type : typeList) {
 
                 List<DashboardGroupConfigDTO> grpList = new ArrayList();
-
+                List<DashboardIndicatorConfigDTO> indicatorList = new ArrayList();
                 //Add associate indicator to grpList
                 switch (type.getTypeIndicator()) {
                     case "CAMPAIGN":
                         AnswerList<Campaign> campaignList = campaignService.readByCriteria(0, 23000, null, null, null, null);
+                        indicatorList = DashboardIndicatorEnum.getIndicatorByType("CAMPAIGN");
                         for (Campaign camp : campaignList.getDataList()) {
-                            DashboardGroupConfigDTO grp = new DashboardGroupConfigDTO(camp.getCampaign(), 10, type.getTypeIndicator(), DashboardIndicatorEnum.getIndicatorByType(type.getTypeIndicator()), false, false);
+                            DashboardGroupConfigDTO grp = new DashboardGroupConfigDTO(camp.getCampaign(), 10, type.getTypeIndicator(), indicatorList, false, false);
                             for (DashboardIndicatorConfigDTO ind : grp.getAvailabilityList()) {
                                 ind.setGroup(grp.getTitle());
                             }
@@ -237,13 +287,21 @@ public class DashboardConfigService implements IDashboardConfigService {
                         break;
                     case "APPLICATION":
                         AnswerList<Application> appList = applicationService.readAll();
+                        indicatorList = DashboardIndicatorEnum.getIndicatorByType("APPLICATION");
                         for (Application app : appList.getDataList()) {
-                            grpList.add(new DashboardGroupConfigDTO(app.getApplication(), 10, type.getTypeIndicator(), DashboardIndicatorEnum.getIndicatorByType(type.getTypeIndicator()), false, false));
+                            grpList.add(new DashboardGroupConfigDTO(app.getApplication(), 10, type.getTypeIndicator(), indicatorList, false, false));
                         }
                         break;
 
                     case "CAMPAIGN_GROUP":
-                        grpList.add(new DashboardGroupConfigDTO("GROUP", 10, type.getTypeIndicator(), DashboardIndicatorEnum.getIndicatorByType(type.getTypeIndicator()), false, false));
+                        List<String> campGroupList = campaignGroupService.readGroupList();
+                        indicatorList = DashboardIndicatorEnum.getIndicatorByType("CAMPAIGN_GROUP");
+                        for (String it : campGroupList) {
+                            if (StringUtil.isNullOrEmpty(it)) {
+                                grpList.add(new DashboardGroupConfigDTO(it, 10, type.getTypeIndicator(), indicatorList, false, false));
+                            }
+                        }
+
                         break;
                     case "GENERIC":
                         grpList.add(new DashboardGroupConfigDTO("GENERIC", 10, type.getTypeIndicator(), DashboardIndicatorEnum.getIndicatorByType(type.getTypeIndicator()), false, false));
@@ -261,25 +319,29 @@ public class DashboardConfigService implements IDashboardConfigService {
                 dashboardGroup = conf.getGroupList();
             }
 
+            //This part is made to set the actual group entry active in typelist
             //Compare current dashboard group to config group
             for (DashboardTypeConfigDTO type : typeList) {
                 for (DashboardGroupConfigDTO grp : type.getGroupList()) {
                     for (DashboardGroup it : dashboardGroup) {
                         //If group is already in Dashboard, active config group
-                        if (it.getAssociateElement().equals(grp.getTitle())) {
+                        if (it.getAssociateElement().equals(grp.getTitle()) && !it.getAssociateElement().isEmpty()) {
                             grp.setIsActive(true);
-
+                            grp.setSort(it.getSort());
                             //Compare current dashboard entries to config entry 
-                            for (DashboardEntry ent : it.getDashboardEntries()) {
-                                for (DashboardIndicatorConfigDTO ind : grp.getAvailabilityList()) {
-
-                                    //activate if entry is already in dashboard
-                                    if (ent.getCodeIndicator().equals(ind.getCodeIndicator())) {
-                                        ind.setIsActive(true);
-                                        ind.setParam1Value(ent.getParam1Val());
-                                        ind.setParam2Value(ent.getParam2Val());
-                                        ind.setParam3Value(ent.getParam3Val());
-                                        ind.setParam4Value(ent.getParam4Val());
+                            if (it.getDashboardEntries() != null) {
+                                for (DashboardEntry ent : it.getDashboardEntries()) {
+                                    if (!StringUtil.isNullOrEmpty(ent.getCodeIndicator())) {
+                                        for (DashboardIndicatorConfigDTO ind : grp.getAvailabilityList()) {
+                                            //activate if entry is already in dashboard
+                                            if (ent.getCodeIndicator().equals(ind.getCodeIndicator())) {
+                                                ind.setIsActive(true);
+                                                ind.setParam1Value(ent.getParam1Val());
+                                                ind.setParam2Value(ent.getParam2Val());
+                                                ind.setParam3Value(ent.getParam3Val());
+                                                ind.setParam4Value(ent.getParam4Val());
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -287,18 +349,10 @@ public class DashboardConfigService implements IDashboardConfigService {
                     }
                 }
             }
-
-            if (conf.getTitle() != null) {
-                response.put("TitleConfig", conf.getTitle());
-            } else {
-                response.put("TitleConfig", "CURRENT");
-            }
-
-            response.put("Config", typeList);
         } catch (Exception exception) {
             LOG.error("Error during read dashboard statement, exception : ", exception);
         }
-        return response;
+        return typeList;
     }
 
     /**
@@ -443,7 +497,6 @@ public class DashboardConfigService implements IDashboardConfigService {
      */
     @Override
     public DashboardGroup dashboardGroupFromConfigDTO(DashboardGroupConfigDTO dashboardGroupConfigDTO, long idConfig) {
-        LOG.debug("CONVERT CONFIG TO GROUP FOR GROUP " + dashboardGroupConfigDTO.getTitle());
         List<DashboardEntry> dashboardEntries = this.convertEntryFromConfigDTO(dashboardGroupConfigDTO.getAvailabilityList());
         Integer sort = dashboardGroupConfigDTO.getSort();
         String associateElement = dashboardGroupConfigDTO.getTitle();
@@ -473,8 +526,8 @@ public class DashboardConfigService implements IDashboardConfigService {
     }
 
     @Override
-    public List<DashboardConfig> readConfigForUser(User user) {
-        return dashboardConfigDAO.readConfigForUser(user);
+    public List<DashboardConfig> readAllConfigsForUser(User user) {
+        return dashboardConfigDAO.readAllConfigsForUser(user);
     }
 
     @Override
@@ -483,7 +536,12 @@ public class DashboardConfigService implements IDashboardConfigService {
     }
 
     @Override
-    public MessageEventSlimDTO delete(String title) {
-        return dashboardConfigDAO.delete(title);
+    public MessageEventSlimDTO delete(String title, User user) {
+        return dashboardConfigDAO.delete(title, user);
+    }
+
+    @Override
+    public boolean isExistingConfig(String title, User user) {
+        return dashboardConfigDAO.isExistingConfig(title, user);
     }
 }

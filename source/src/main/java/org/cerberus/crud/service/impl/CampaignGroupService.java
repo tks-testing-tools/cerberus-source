@@ -15,29 +15,38 @@
 
  You should have received a copy of the GNU General Public License
  along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.*/
-package org.cerberus.crud.dao;
+package org.cerberus.crud.service.impl;
 
-import java.sql.ResultSet;
 import java.util.List;
-import org.cerberus.crud.entity.DashboardConfig;
-import org.cerberus.crud.entity.User;
-import org.cerberus.dto.MessageEventSlimDTO;
+import org.cerberus.crud.dao.ICampaignGroupDAO;
+import org.cerberus.crud.service.ICampaignGroupService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author cDelage
  */
-public interface IDashboardConfigDAO {
+@Service
+public class CampaignGroupService implements ICampaignGroupService {
 
-    public long create(DashboardConfig conf, User user);
+    @Autowired
+    private ICampaignGroupDAO campaignGroupDAO;
 
-    public MessageEventSlimDTO delete(String title, User user);
+    @Override
+    public List<String> readGroupList() {
+        return campaignGroupDAO.readGroupList();
+    }
 
-    public DashboardConfig read(String title, User user);
+    @Override
+    public List<String> getAllCampaignByGroup(String group) {
+        return campaignGroupDAO.getAllCampaignByGroup(group);
+    }
 
-    public List<DashboardConfig> readAllConfigsForUser(User user);
+    @Override
+    public boolean isExistingGroup(String group) {
+        return campaignGroupDAO.isExistingGroup(group);
 
-    public DashboardConfig loadFromResultSet(ResultSet rs, User user);
+    }
 
-    public boolean isExistingConfig(String title, User user);
 }

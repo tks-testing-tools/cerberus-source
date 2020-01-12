@@ -8384,8 +8384,12 @@ public class DatabaseVersioningService implements IDatabaseVersioningService {
                 + ")ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 
         a.add("INSERT INTO `dashboardindicator` (`code_indicator`,`type_indicator`)"
-                + "VALUES ('CAMPAIGN_LAST_EXE_DETAIL','CAMPAIGN'),"
-                + "('CAMPAIGN_EVOLUTION','CAMPAIGN');");
+                + "VALUES ('CAMP_LAST_EXE_DETAIL','CAMPAIGN'),"
+                + "('CAMP_EVOLUTION','CAMPAIGN'),"
+                + "('APP_TC_STATUS','APPLICATION'),"
+                + "('CAMP_LAST_EXE_STATUS','CAMPAIGN'),"
+                + "('CAMP_TEN_EXE_STATUS','CAMPAIGN'),"
+                + "('CAMP_EXE_FREQ','CAMPAIGN');");
 
         a.add("CREATE TABLE `dashboardconfig` ("
                 + "`id_config` int(11) NOT NULL AUTO_INCREMENT,"

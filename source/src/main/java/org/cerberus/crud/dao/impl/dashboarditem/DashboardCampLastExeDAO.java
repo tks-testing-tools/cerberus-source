@@ -40,12 +40,12 @@ import org.springframework.stereotype.Repository;
  * @author CorentinDelage
  */
 @Repository
-public class DashboardCampaignLastExeDAO implements IDashboardEntryDataDAO {
+public class DashboardCampLastExeDAO implements IDashboardEntryDataDAO {
 
     @Autowired
     private DatabaseSpring databaseSpring;
 
-    private static final Logger LOG = LogManager.getLogger(DashboardCampaignLastExeDAO.class);
+    private static final Logger LOG = LogManager.getLogger(DashboardCampLastExeDAO.class);
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
     private SimpleDateFormat durationFormat = new SimpleDateFormat("HH:mm:ss");

@@ -58,7 +58,7 @@ public class DashboardGroupDAO implements IDashboardGroupDAO {
         StringBuilder query = new StringBuilder();
         query.append("SELECT `id_group`,`id_config`,`sort`,`associate_element`,`type` "
                 + "FROM `dashboardgroup`"
-                + "WHERE `id_config`= ? ;");
+                + "WHERE `id_config`= ? ORDER BY `sort`;");
 
         try {
             Connection connection = this.databaseSpring.connect();

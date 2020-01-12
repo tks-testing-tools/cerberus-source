@@ -21,8 +21,11 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.cerberus.crud.dao.impl.dashboarditem.DashboardCampaignEvolutionDAO;
-import org.cerberus.crud.dao.impl.dashboarditem.DashboardCampaignLastExeDAO;
+import org.cerberus.crud.dao.impl.dashboarditem.DashboardAppStatusDAO;
+import org.cerberus.crud.dao.impl.dashboarditem.DashboardCampReportStatusDAO;
+import org.cerberus.crud.dao.impl.dashboarditem.DashboardCampEvolutionDAO;
+import org.cerberus.crud.dao.impl.dashboarditem.DashboardCampExeFreqDAO;
+import org.cerberus.crud.dao.impl.dashboarditem.DashboardCampLastExeDAO;
 import org.cerberus.crud.entity.DashboardEntry;
 import org.cerberus.crud.service.IDashboardEntryDataService;
 import org.cerberus.dto.MessageEventSlimDTO;
@@ -40,10 +43,19 @@ import org.springframework.stereotype.Service;
 public class DashboardEntryDataService implements IDashboardEntryDataService {
 
     @Autowired
-    private DashboardCampaignEvolutionDAO dashboardCampaignEvolutionDAO;
+    private DashboardCampEvolutionDAO dashboardCampaignEvolutionDAO;
 
     @Autowired
-    private DashboardCampaignLastExeDAO dashboardCampainLastReportByStatusDAO;
+    private DashboardCampLastExeDAO dashboardCampainLastReportByStatusDAO;
+
+    @Autowired
+    private DashboardAppStatusDAO dashboardAppStatusDAO;
+    
+    @Autowired
+    private DashboardCampReportStatusDAO dashboardCampReportStatusDAO;
+    
+    @Autowired
+    private DashboardCampExeFreqDAO dashboardCampExeFreqDAO;
 
     private static final Logger LOG = LogManager.getLogger(DashboardEntryService.class);
 
@@ -55,14 +67,14 @@ public class DashboardEntryDataService implements IDashboardEntryDataService {
 
         try {
             switch (dashboardEntry.getCodeIndicator()) {
-                case "CAMPAIGN_EVOLUTION":
+                case "CAMP_EVOLUTION":
 
                     //Read raw data
                     dashboardEntryData = dashboardCampaignEvolutionDAO.readDataForDashboardEntry(dashboardEntry);
 
                     //Calcul initial nb of data entry
                     long nbEntry = DashboardUtil.computeNbEntry(dashboardEntryData, 2);
-                    
+
                     //Calcul param 3 or set 10 value by default
                     Integer xScale = 10;
                     if (!dashboardEntry.getParam3Val().equals("DEFAULT")) {
@@ -76,18 +88,23 @@ public class DashboardEntryDataService implements IDashboardEntryDataService {
                     //Reduce value to x scale values
                     dashboardEntryData = DashboardUtil.reduceMapForChart(dashboardEntryData, xScale, 2);
 
-                    LOG.debug(dashboardEntryData.size());
+                    //Copy Value_1 , Paste Value_2 to use in advancement
+                    dashboardEntryData = DashboardUtil.duplicateLine(dashboardEntryData, 2, 1, "long");
+                    
+                    //Convert Line 2 from string to long
+                    dashboardEntryData = DashboardUtil.convertLineToLong(dashboardEntryData, 3, 1);
+                    
                     //Compute advancement
-                    dashboardEntryData = DashboardUtil.computeAdvancement(dashboardEntryData, 2, 1);
+                    dashboardEntryData = DashboardUtil.computeAdvancement(dashboardEntryData, 3, 2);
 
                     //Calcul scale, median and final tag, values must be added after all map manipulation to don't corrupt data
-                    long y_scale = DashboardUtil.generateScale(dashboardEntryData, 2, 1, 1.25);
-                    long median = DashboardUtil.computeMedian(dashboardEntryData, 2, 1);
-                    long x_scale = DashboardUtil.computeNbEntry(dashboardEntryData, 2);
-                    
+                    long y_scale = DashboardUtil.generateScale(dashboardEntryData, 3, 1, 1.25);
+                    long median = DashboardUtil.computeMedian(dashboardEntryData, 3, 2);
+                    long x_scale = DashboardUtil.computeNbEntry(dashboardEntryData, 3);
+
                     //Add scale
                     dashboardEntryData.put("SCALE_Y", y_scale);
-                    
+
                     //Add actuel nb of entry data
                     dashboardEntryData.put("FINAL_TOTAL_TAG", x_scale);
 
@@ -97,8 +114,22 @@ public class DashboardEntryDataService implements IDashboardEntryDataService {
                     dashboardEntryData.put("INITIAL_TOTAL_TAG", nbEntry);
 
                     break;
-                case "CAMPAIGN_LAST_EXE_DETAIL":
+                case "CAMP_LAST_EXE_DETAIL":
                     dashboardEntryData = dashboardCampainLastReportByStatusDAO.readDataForDashboardEntry(dashboardEntry);
+                    break;
+                case "APP_TC_STATUS":
+                    dashboardEntryData = dashboardAppStatusDAO.readDataForDashboardEntry(dashboardEntry);
+                    break;
+                case "CAMP_LAST_EXE_STATUS":
+                    dashboardEntry.setParam1Val("1");
+                    dashboardEntryData = dashboardCampReportStatusDAO.readDataForDashboardEntry(dashboardEntry);
+                    break;
+                case "CAMP_TEN_EXE_STATUS":
+                    dashboardEntry.setParam1Val("10");
+                    dashboardEntryData = dashboardCampReportStatusDAO.readDataForDashboardEntry(dashboardEntry);
+                    break;
+                case "CAMP_EXE_FREQ":
+                    dashboardEntryData = dashboardCampExeFreqDAO.readDataForDashboardEntry(dashboardEntry);
                     break;
                 default:
                     dashboardEntryData.put("Unknown report item type", "Error");
