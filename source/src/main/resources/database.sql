@@ -5775,3 +5775,7 @@ UPDATE invariant SET value = 'true' WHERE idname = 'CTRLFATAL' AND value = 'Y';
 
 -- 1613
 UPDATE invariant SET value = 'false' WHERE idname = 'CTRLFATAL' AND value != 'true';
+
+-- 1614
+INSERT INTO invariant(idname, value, sort, description, VeryShortDesc)
+  VALUES('CONTROL', 'countChildInElement', 6520, 'countChildInElement', 'countChildInElement');

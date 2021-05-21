@@ -1,43 +1,27 @@
 /**
  * Cerberus Copyright (C) 2013 - 2017 cerberustesting
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
+ * <p>
  * This file is part of Cerberus.
- *
+ * <p>
  * Cerberus is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * Cerberus is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.cerberus.engine.gwt.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.cerberus.crud.entity.AppService;
-import org.cerberus.crud.entity.Application;
-import org.cerberus.crud.entity.TestCaseExecution;
-import org.cerberus.crud.entity.TestCaseExecutionFile;
-import org.cerberus.crud.entity.TestCaseStepActionControl;
-import org.cerberus.crud.entity.TestCaseStepActionControlExecution;
-import org.cerberus.crud.entity.TestCaseStepActionExecution;
+import org.apache.logging.log4j.Logger;
+import org.cerberus.crud.entity.*;
 import org.cerberus.engine.entity.Identifier;
 import org.cerberus.engine.entity.MessageEvent;
 import org.cerberus.engine.entity.MessageGeneral;
@@ -61,6 +45,17 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * {Insert class description here}
@@ -328,6 +323,9 @@ public class ControlService implements IControlService {
                     break;
                 case TestCaseStepActionControl.CONTROL_GETPAGESOURCE:
                     res = this.getPageSource(tCExecution, testCaseStepActionControlExecution.getTestCaseStepActionExecution(), testCaseStepActionControlExecution);
+                    break;
+                case TestCaseStepActionControl.CONTROL_COUNT_CHILD_IN_ELEMENT:
+                    res = this.countChildInElement(tCExecution, testCaseStepActionControlExecution);
                     break;
 
                 default:
@@ -1197,13 +1195,13 @@ public class ControlService implements IControlService {
 
                         case AppService.RESPONSEHTTPBODYCONTENTTYPE_JSON:
                             try {
-                            pathContent = jsonService.getFromJson(responseBody, null, path);
-                        } catch (Exception ex) {
-                            mes = new MessageEvent(MessageEventEnum.CONTROL_FAILED_GENERIC);
-                            mes.setDescription(mes.getDescription().replace("%ERROR%", ex.toString()));
-                            return mes;
-                        }
-                        break;
+                                pathContent = jsonService.getFromJson(responseBody, null, path);
+                            } catch (Exception ex) {
+                                mes = new MessageEvent(MessageEventEnum.CONTROL_FAILED_GENERIC);
+                                mes.setDescription(mes.getDescription().replace("%ERROR%", ex.toString()));
+                                return mes;
+                            }
+                            break;
 
                         default:
                             mes = new MessageEvent(MessageEventEnum.CONTROL_NOTEXECUTED_NOTSUPPORTED_FOR_MESSAGETYPE);
@@ -1680,10 +1678,35 @@ public class ControlService implements IControlService {
         return message;
     }
 
+    private MessageEvent countChildInElement(TestCaseExecution tCExecution, TestCaseStepActionControlExecution testCaseStepActionControlExecution) {
+        MessageEvent message;
+        if (tCExecution.getAppTypeEngine().equalsIgnoreCase(Application.TYPE_GUI)
+                || tCExecution.getAppTypeEngine().equalsIgnoreCase(Application.TYPE_APK)
+                || tCExecution.getAppTypeEngine().equalsIgnoreCase(Application.TYPE_IPA)) {
+
+            String elementPath = testCaseStepActionControlExecution.getValue1();
+            String countExpect = testCaseStepActionControlExecution.getValue2();
+
+            int countActual = webdriverService.countElement(tCExecution.getSession(), identifierService.convertStringToIdentifier(elementPath));
+            if (countExpect.equals(String.valueOf(countActual))) {
+                message = new MessageEvent(MessageEventEnum.CONTROL_SUCCESS);
+            } else {
+                message = new MessageEvent(MessageEventEnum.CONTROL_FAILED);
+                message.setDescription(MessageFormat.format("Actual: {0} Expect: {1}", countActual, countExpect));
+            }
+            return message;
+        }
+
+        message = new MessageEvent(MessageEventEnum.CONTROL_NOTEXECUTED_NOTSUPPORTED_FOR_APPLICATION);
+        message.setDescription(message.getDescription().replace("%CONTROL%", "takeScreenShot"));
+        message.setDescription(message.getDescription().replace("%APPLICATIONTYPE%", testCaseStepActionControlExecution.getTestCaseStepActionExecution().getTestCaseStepExecution().gettCExecution().getAppTypeEngine()));
+        return message;
+    }
+
     /**
-     * @author memiks
      * @param exception the exception need to be parsed by Cerberus
      * @return A new Event Message with selenium related description
+     * @author memiks
      */
     private MessageEvent parseWebDriverException(WebDriverException exception) {
         MessageEvent mes;

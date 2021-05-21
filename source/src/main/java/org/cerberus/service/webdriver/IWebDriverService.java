@@ -1,38 +1,36 @@
 /**
  * Cerberus Copyright (C) 2013 - 2017 cerberustesting
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
+ * <p>
  * This file is part of Cerberus.
- *
+ * <p>
  * Cerberus is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * Cerberus is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.cerberus.service.webdriver;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 import org.cerberus.engine.entity.Identifier;
 import org.cerberus.engine.entity.MessageEvent;
 import org.cerberus.engine.entity.Session;
 import org.cerberus.exception.CerberusEventException;
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 /**
- *
  * @author bcivel
  */
 public interface IWebDriverService {
@@ -64,7 +62,6 @@ public interface IWebDriverService {
     String getTitle(Session session);
 
     /**
-     *
      * Method return a string with the right part of the URL in order to be
      * agnostic of the environment. ex :
      * http://redoute.com/mypathlevel1/mypathlevel2/file.aspx will return
@@ -75,9 +72,9 @@ public interface IWebDriverService {
      * @return string with the right part of the URL in order to be agnostic of
      * the environment.
      * @throws org.cerberus.exception.CerberusEventException in case the URL
-     * does not contain the host of the application beeing tested. That could
-     * happen if the application redirect to a different host during the
-     * testcase execution.
+     *                                                       does not contain the host of the application beeing tested. That could
+     *                                                       happen if the application redirect to a different host during the
+     *                                                       testcase execution.
      */
     String getCurrentUrl(Session session, String url) throws CerberusEventException;
 
@@ -138,4 +135,13 @@ public interface IWebDriverService {
     MessageEvent doSeleniumActionDragAndDrop(Session session, Identifier object, Identifier property, boolean waitForVisibility, boolean waitForClickability) throws IOException;
 
     MessageEvent doSeleniumActionRefreshCurrentPage(Session session);
+
+    /**
+     * Count element
+     *
+     * @param session
+     * @param identifier xpath or class
+     * @return
+     */
+    int countElement(Session session, Identifier identifier);
 }

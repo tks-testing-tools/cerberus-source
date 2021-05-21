@@ -480,7 +480,6 @@ public class ActionService implements IActionService {
 
     private MessageEvent doActionScrollTo(TestCaseExecution tCExecution, String element, String text) {
         MessageEvent message;
-
         try {
             Identifier identifier = null;
             if (!StringUtil.isNullOrEmpty(element)) {

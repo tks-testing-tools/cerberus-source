@@ -1,19 +1,19 @@
 /**
  * Cerberus Copyright (C) 2013 - 2017 cerberustesting
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
+ * <p>
  * This file is part of Cerberus.
- *
+ * <p>
  * Cerberus is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * Cerberus is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with Cerberus.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,27 +22,8 @@ package org.cerberus.service.webdriver.impl;
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.win32.W32APIOptions;
-import java.awt.AWTException;
-import java.awt.Color;
-import java.awt.GraphicsEnvironment;
-import java.awt.Robot;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-import java.util.stream.Collectors;
-import javax.imageio.ImageIO;
+import mantu.lab.treematching.TreeMatcher;
+import mantu.lab.treematching.TreeMatcherResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cerberus.crud.service.impl.ParameterService;
@@ -59,20 +40,8 @@ import org.cerberus.util.answer.AnswerItem;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.NoSuchWindowException;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.Platform;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
@@ -84,10 +53,24 @@ import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import mantu.lab.treematching.*;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.List;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
 
 /**
- *
  * @author bcivel
  */
 @Service
@@ -506,7 +489,7 @@ public class WebDriverService implements IWebDriverService {
      * @param applicationUrl
      * @return current URL without HTTP://IP:PORT/CONTEXTROOT/
      * @throws CerberusEventException Cannot find application host (from
-     * Database) inside current URL (from Selenium)
+     *                                Database) inside current URL (from Selenium)
      */
     @Override
     public String getCurrentUrl(Session session, String applicationUrl) throws CerberusEventException {
@@ -1125,6 +1108,7 @@ public class WebDriverService implements IWebDriverService {
         boolean SetForegroundWindow(HWND hWnd);
 
         HWND FindWindow(String winClass, String title);
+
         int SW_SHOW = 1;
     }
 
@@ -1144,13 +1128,13 @@ public class WebDriverService implements IWebDriverService {
 
             // Arbitrary
             String[] browsers = new String[]{
-                "",
-                "Google Chrome",
-                "Mozilla Firefox",
-                "Opera",
-                "Safari",
-                "Internet Explorer",
-                "Microsoft Edge",};
+                    "",
+                    "Google Chrome",
+                    "Mozilla Firefox",
+                    "Opera",
+                    "Safari",
+                    "Internet Explorer",
+                    "Microsoft Edge",};
 
             for (String browser : browsers) {
                 HWND window;
@@ -1674,9 +1658,21 @@ public class WebDriverService implements IWebDriverService {
     }
 
     /**
-     * @author vertigo17
+     * {@inheritDoc}
+     */
+    @Override
+    public int countElement(Session session, Identifier identifier) {
+        if (StringUtil.isNullOrEmpty(identifier.getIdentifier())) {
+            return 0;
+        }
+
+        return session.getDriver().findElements(this.getBy(identifier)).size();
+    }
+
+    /**
      * @param exception the exception need to be parsed by Cerberus
      * @return A new Event Message with selenium related description
+     * @author vertigo17
      */
     private MessageEvent parseWebDriverException(WebDriverException exception) {
         MessageEvent mes;
@@ -1685,5 +1681,4 @@ public class WebDriverService implements IWebDriverService {
         mes.setDescription(mes.getDescription().replace("%ERROR%", exception.getMessage().split("\n")[0]));
         return mes;
     }
-
 }

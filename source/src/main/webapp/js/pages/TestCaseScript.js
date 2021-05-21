@@ -1077,7 +1077,8 @@ var controlUIList = {
         {"type": "verifyTextInDialog", "value2": null, "value1": "Text", "acol1": "col-lg-8", "value3": null, "fatal": ""},
         {"type": "verifyXmlTreeStructure", "value2": "Tree", "acol2": "col-lg-4", "value1": "XPath", "acol1": "col-lg-4", "value3": null, "fatal": ""},
         {"type": "takeScreenshot", "value2": null, "value1": "[opt] Crop values in pixels (left,right,top,bottom)", "acol1": "col-lg-8", "value3": null, "fatal": null},
-        {"type": "getPageSource", "value2": null, "value1": null, "value3": null, "fatal": null}
+        {"type": "getPageSource", "value2": null, "value1": null, "value3": null, "fatal": null},
+        {"type": "countChildInElement", "value1": "Element path", "acol1": "col-lg-3", "value2": "Count element", "acol2": "col-lg-3", "value3": null, "acol3": "col-lg-2", "fatal": ""},
     ]
 };
 
